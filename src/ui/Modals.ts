@@ -638,6 +638,7 @@ export class ModalsManager {
 
 
 
+        <img class="preview-cover" src="${game.cover || `/covers/${game.id}.svg`}" alt="${game.title}" style="width:100%;height:160px;object-fit:cover;border-radius:14px;margin-bottom:12px" onerror="this.style.display='none'" />
         <div class="preview-hero">
 
           <div class="preview-icon">${game.icon}</div>
@@ -910,6 +911,7 @@ export class ModalsManager {
 
           <div class="game-catalog-card ${g.implemented ? 'playable' : 'coming-soon'} ${!isCompatible ? 'incompatible' : ''}" data-id="${g.id}">
 
+            <img class="game-cover" src="${g.cover || `/covers/${g.id}.svg`}" alt="${g.title}" loading="lazy" onerror="this.style.display='none'" />
             <div class="card-top-row">
 
               <span class="card-icon">${g.icon}</span>

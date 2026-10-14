@@ -39,6 +39,7 @@ export interface GameMetadata {
   durationSeconds: number;
   difficulty: GameDifficulty;
   icon: string;
+  cover?: string; // e.g. /covers/quick-tap.svg
   controls?: string;
   implemented: boolean;
 }

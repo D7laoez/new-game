@@ -57,7 +57,7 @@ export class BalloonPopGame extends BaseMiniGame {
   }
 
   protected onStart(): void {
-    this.gameTimerId = window.setInterval(() => {
+    this.gameTimerId = this.setGameInterval(() => {
       this.timeLeft--;
       if (this.timerEl) this.timerEl.textContent = `⏱️ ${this.timeLeft}s`;
 
@@ -66,7 +66,7 @@ export class BalloonPopGame extends BaseMiniGame {
       }
     }, 1000);
 
-    this.spawnIntervalId = window.setInterval(() => {
+    this.spawnIntervalId = this.setGameInterval(() => {
       this.spawnBalloons();
     }, 600);
 

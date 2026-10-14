@@ -121,7 +121,7 @@ export class IceSlideGame extends BaseMiniGame {
   }
 
   protected onStart(): void {
-    this.timerIntervalId = window.setInterval(() => {
+    this.timerIntervalId = this.setGameInterval(() => {
       this.timeLeft -= 0.1;
       const timerEl = this.container.querySelector('#is-timer');
       if (timerEl) timerEl.textContent = `${Math.max(0, this.timeLeft).toFixed(1)}s`;

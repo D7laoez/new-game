@@ -89,7 +89,7 @@ export class NumberRushGame extends BaseMiniGame {
 
   protected onStart(): void {
     this.startTime = Date.now();
-    this.timerIntervalId = window.setInterval(() => {
+    this.timerIntervalId = this.setGameInterval(() => {
       this.timeLeft--;
       if (this.timerEl) this.timerEl.textContent = `⏱️ ${this.timeLeft}s`;
 

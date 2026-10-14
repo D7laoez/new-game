@@ -1298,3 +1298,9 @@ export const GAME_CATALOG: GameMetadata[] = [
     implemented: false
   }
 ];
+
+// Auto-derive cover SVGs for every entry (offline PWA, no external assets)
+for (const g of GAME_CATALOG) {
+  if (!g.cover) (g as unknown as { cover: string }).cover = g.implemented ? `/covers/${g.id}.jpg` : `/covers/${g.id}.svg`;
+}
+

@@ -83,7 +83,7 @@ export class LaneSwitchGame extends BaseMiniGame {
   }
 
   protected onStart(): void {
-    this.timerIntervalId = window.setInterval(() => {
+    this.timerIntervalId = this.setGameInterval(() => {
       this.gameTime += 0.1;
       const timeLeft = Math.max(0, this.maxDuration - this.gameTime);
       const timerEl = this.container.querySelector('#ls-timer');

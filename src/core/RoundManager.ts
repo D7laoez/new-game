@@ -32,6 +32,7 @@ export class RoundManager {
   private config!: PartyConfig;
   private currentGameMeta: GameMetadata | null = null;
   private state: SessionState = 'IDLE';
+  private isHandlingFinish = false;
 
   constructor(
     private playerManager: PlayerManager,
@@ -55,6 +56,7 @@ export class RoundManager {
   }
 
   nextRound(): void {
+    this.isHandlingFinish = false;
     if (this.currentRound >= this.config.totalRounds) {
       this.finishSession();
       return;
@@ -110,7 +112,10 @@ export class RoundManager {
   }
 
   private handleGameFinished(result: MiniGameResult): void {
+    if (this.isHandlingFinish) return;
     if (!this.currentGameMeta) return;
+    this.isHandlingFinish = true;
+    // Reset guard on next tick so next round can finish again
 
     const isTournament = this.config.mode === 'TOURNAMENT';
     const roundResult = this.scoreManager.recordRound(
@@ -161,6 +166,7 @@ export class RoundManager {
   }
 
   endSession(): void {
+    this.isHandlingFinish = false;
     this.miniGameManager.destroyCurrentGame();
     this.setState('IDLE');
   }

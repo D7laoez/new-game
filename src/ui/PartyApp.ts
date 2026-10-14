@@ -29,6 +29,7 @@ export class PartyApp {
   private gameArenaView!: HTMLElement;
   private introOverlay!: HTMLElement;
   private introTimer: number | null = null;
+  private introGoTimeoutId: number | null = null;
 
   private currentLang: Language = 'en';
   private pendingRounds: RoundResult[] = [];
@@ -371,6 +372,10 @@ export class PartyApp {
       clearInterval(this.introTimer);
       this.introTimer = null;
     }
+    if (this.introGoTimeoutId !== null) {
+      clearTimeout(this.introGoTimeoutId);
+      this.introGoTimeoutId = null;
+    }
   }
 
   private showIntroOverlay(game: GameMetadata): void {
@@ -380,6 +385,7 @@ export class PartyApp {
 
     this.introOverlay.innerHTML = `
       <div class="intro-card">
+        <img class="intro-cover" src="${game.cover || `/covers/${game.id}.svg`}" alt="${game.title}" onerror="this.style.display='none'" />
         <div class="intro-category-badge">${game.category}</div>
         <div class="intro-icon">${game.icon}</div>
         <h2 class="intro-title">${isAr && game.titleAr ? game.titleAr : game.title}</h2>
@@ -409,7 +415,8 @@ export class PartyApp {
         this.audioManager.playCountdown(0);
         this.hapticManager.heavy();
 
-        window.setTimeout(() => {
+        this.introGoTimeoutId = window.setTimeout(() => {
+          this.introGoTimeoutId = null;
           this.introOverlay.classList.add('hidden');
           const viewport = this.appRoot.querySelector('#game-viewport') as HTMLElement;
           if (viewport) this.roundManager.launchGame(viewport);

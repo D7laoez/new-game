@@ -90,7 +90,7 @@ export class RaceTo100Game extends BaseMiniGame {
   }
 
   protected onStart(): void {
-    this.timerIntervalId = window.setInterval(() => {
+    this.timerIntervalId = this.setGameInterval(() => {
       this.timeLeft--;
       if (this.timerEl) this.timerEl.textContent = `⏱️ ${this.timeLeft}s`;
 

@@ -64,7 +64,7 @@ export class FishingFrenzyGame extends BaseMiniGame {
   }
 
   protected onStart(): void {
-    this.timerIntervalId = window.setInterval(() => {
+    this.timerIntervalId = this.setGameInterval(() => {
       this.timeLeft -= 0.1;
       const timerEl = this.container.querySelector('#ff-timer');
       if (timerEl) timerEl.textContent = `${Math.max(0, this.timeLeft).toFixed(1)}s`;
@@ -88,7 +88,7 @@ export class FishingFrenzyGame extends BaseMiniGame {
 
     const waitDelay = 1000 + Math.random() * 1800;
 
-    const t1 = window.setTimeout(() => {
+    const t1 = this.setGameTimeout(() => {
       if (!this.isRunning || this.isFinished) return;
 
       // False nibble (50% chance)
@@ -97,7 +97,7 @@ export class FishingFrenzyGame extends BaseMiniGame {
         this.updateBobberUI(playerId, 'NIBBLE');
         this.context.audio.playTone(300, 0.05);
 
-        const t2 = window.setTimeout(() => {
+        const t2 = this.setGameTimeout(() => {
           if (!this.isRunning || this.isFinished) return;
           this.triggerRealBite(playerId);
         }, 700);
@@ -117,7 +117,7 @@ export class FishingFrenzyGame extends BaseMiniGame {
     this.context.haptics.heavy();
 
     // Fish escapes after 800ms
-    const tEscape = window.setTimeout(() => {
+    const tEscape = this.setGameTimeout(() => {
       if (!this.isRunning || this.isFinished) return;
       if (this.playerFishingState.get(playerId) === 'BITE') {
         this.scheduleNextBite(playerId);
