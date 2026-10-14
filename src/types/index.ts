@@ -5,7 +5,12 @@ export type GameCategory =
   | 'COMPETITION'
   | 'PUZZLE'
   | 'PARTY'
-  | 'DRAWING';
+  | 'DRAWING'
+  | 'REFLEX'
+  | 'SKILL'
+  | 'BRAIN'
+  | 'TIMING';
+
 
 export type PlayerId = 1 | 2 | 3 | 4;
 

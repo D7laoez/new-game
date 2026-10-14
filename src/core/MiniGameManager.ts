@@ -25,6 +25,16 @@ import { DontPressItGame } from '../games/DontPressItGame.ts';
 import { TreasureDigGame } from '../games/TreasureDigGame.ts';
 import { RaceTo100Game } from '../games/RaceTo100Game.ts';
 import { ShapeSnapGame } from '../games/ShapeSnapGame.ts';
+import { LaneSwitchGame } from '../games/LaneSwitchGame.ts';
+import { ColorConveyorGame } from '../games/ColorConveyorGame.ts';
+import { TinyBowlingGame } from '../games/TinyBowlingGame.ts';
+import { MemorySequenceDuelGame } from '../games/MemorySequenceDuelGame.ts';
+import { ReactionGridGame } from '../games/ReactionGridGame.ts';
+import { TinyGolfGame } from '../games/TinyGolfGame.ts';
+import { WordScrambleGame } from '../games/WordScrambleGame.ts';
+import { CatchTheFruitGame } from '../games/CatchTheFruitGame.ts';
+import { SumSprintGame } from '../games/SumSprintGame.ts';
+import { PerfectLandingGame } from '../games/PerfectLandingGame.ts';
 
 type GameFactory = () => IMiniGame;
 
@@ -63,6 +73,16 @@ export class MiniGameManager {
     this.registerGame('treasure-dig', () => new TreasureDigGame());
     this.registerGame('race-to-100', () => new RaceTo100Game());
     this.registerGame('shape-snap', () => new ShapeSnapGame());
+    this.registerGame('lane-switch', () => new LaneSwitchGame());
+    this.registerGame('color-conveyor', () => new ColorConveyorGame());
+    this.registerGame('tiny-bowling', () => new TinyBowlingGame());
+    this.registerGame('memory-sequence-duel', () => new MemorySequenceDuelGame());
+    this.registerGame('reaction-grid', () => new ReactionGridGame());
+    this.registerGame('tiny-golf', () => new TinyGolfGame());
+    this.registerGame('word-scramble', () => new WordScrambleGame());
+    this.registerGame('catch-the-fruit', () => new CatchTheFruitGame());
+    this.registerGame('sum-sprint', () => new SumSprintGame());
+    this.registerGame('perfect-landing', () => new PerfectLandingGame());
   }
 
   registerGame(id: string, factory: GameFactory): void {

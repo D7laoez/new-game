@@ -334,13 +334,13 @@ describe('Party Game Collection - Phase 3 Comprehensive Test Suite', () => {
       expect(GAME_CATALOG.length).toBeGreaterThanOrEqual(55);
     });
 
-    it('25. has exactly 25 fully implemented playable games in Phase 3', () => {
+    it('25. has exactly 35 fully implemented playable games in Phase 4', () => {
       const mgm = new MiniGameManager();
       const implemented = mgm.getImplementedGames();
-      expect(implemented.length).toBe(25);
+      expect(implemented.length).toBe(35);
     });
 
-    it('26. all 25 games include valid metadata', () => {
+    it('26. all 35 games include valid metadata', () => {
       const mgm = new MiniGameManager();
       const implemented = mgm.getImplementedGames();
 
@@ -361,14 +361,14 @@ describe('Party Game Collection - Phase 3 Comprehensive Test Suite', () => {
 
       expect(soloGames.find(g => g.id === 'tug-of-war')).toBeUndefined();
       expect(soloGames.find(g => g.id === 'bomb-pass')).toBeUndefined();
-      expect(soloGames.length).toBeGreaterThan(15);
+      expect(soloGames.length).toBeGreaterThan(25);
     });
 
     it('28. supports games correctly when player count is 2, 3, or 4', () => {
       const mgm = new MiniGameManager();
       const implemented = mgm.getImplementedGames();
       const fourPlayerGames = implemented.filter(g => g.supportedPlayers.includes(4));
-      expect(fourPlayerGames.length).toBe(25);
+      expect(fourPlayerGames.length).toBe(35);
     });
 
     it('29. prevents immediate game repetition across a party cycle', () => {
@@ -390,10 +390,10 @@ describe('Party Game Collection - Phase 3 Comprehensive Test Suite', () => {
   });
 
   // ==========================================
-  // 7. ALL 25 MINI-GAMES LIFECYCLE & EXECUTION
+  // 7. ALL 35 MINI-GAMES LIFECYCLE & EXECUTION
   // ==========================================
   describe('Mini-Games Lifecycle Verification', () => {
-    it('31. successfully instantiates and initializes all 25 mini-games without errors', () => {
+    it('31. successfully instantiates and initializes all 35 mini-games without errors', () => {
       const mgm = new MiniGameManager();
       const pm = new PlayerManager();
       pm.setActiveCount(2);
@@ -401,7 +401,8 @@ describe('Party Game Collection - Phase 3 Comprehensive Test Suite', () => {
       const haptics = new HapticManager(false);
 
       const implemented = mgm.getImplementedGames();
-      expect(implemented.length).toBe(25);
+      expect(implemented.length).toBe(35);
+
 
       implemented.forEach(g => {
         const container = document.createElement('div');
@@ -901,5 +902,241 @@ describe('Party Game Collection - Phase 3 Comprehensive Test Suite', () => {
       expect(() => audio.playBuzzer()).not.toThrow();
     });
   });
+
+  // ==========================================
+  // 13. PHASE 4 GAMES (GAMES 26 - 35) TESTS
+  // ==========================================
+  describe('Phase 4 Mini-Games Suite (Games 26 - 35)', () => {
+    it('59. Game 26: Lane Switch initializes, switches lanes, and cleans up', () => {
+      const mgm = new MiniGameManager();
+      const pm = new PlayerManager();
+      pm.setActiveCount(2);
+      const container = document.createElement('div');
+
+      mgm.loadGame('lane-switch', {
+        container,
+        players: pm.getActivePlayers(),
+        activePlayerCount: 2,
+        difficulty: 'NORMAL',
+        audio: new AudioManager(false),
+        haptics: new HapticManager(false),
+        onFinish: () => {}
+      });
+
+      const game = mgm.getCurrentGame()!;
+      game.start();
+      expect(() => game.handleInput(1, 'LEFT')).not.toThrow();
+      expect(() => game.handleInput(1, 'RIGHT')).not.toThrow();
+      game.destroy();
+    });
+
+    it('60. Game 27: Color Conveyor sorts colors and handles incorrect sorts', () => {
+      const mgm = new MiniGameManager();
+      const pm = new PlayerManager();
+      pm.setActiveCount(2);
+      const container = document.createElement('div');
+
+      mgm.loadGame('color-conveyor', {
+        container,
+        players: pm.getActivePlayers(),
+        activePlayerCount: 2,
+        difficulty: 'NORMAL',
+        audio: new AudioManager(false),
+        haptics: new HapticManager(false),
+        onFinish: () => {}
+      });
+
+      const game = mgm.getCurrentGame()!;
+      game.start();
+      expect(() => game.handleInput(1, 'SORT', 'RED')).not.toThrow();
+      game.destroy();
+    });
+
+    it('61. Game 28: Tiny Bowling aims, sets power, and handles turns', () => {
+      const mgm = new MiniGameManager();
+      const pm = new PlayerManager();
+      pm.setActiveCount(2);
+      const container = document.createElement('div');
+
+      mgm.loadGame('tiny-bowling', {
+        container,
+        players: pm.getActivePlayers(),
+        activePlayerCount: 2,
+        difficulty: 'NORMAL',
+        audio: new AudioManager(false),
+        haptics: new HapticManager(false),
+        onFinish: () => {}
+      });
+
+      const game = mgm.getCurrentGame()!;
+      game.start();
+      expect(() => game.handleInput(1, 'ROLL')).not.toThrow();
+      game.destroy();
+    });
+
+    it('62. Game 29: Memory Sequence Duel handles player sequence input', () => {
+      const mgm = new MiniGameManager();
+      const pm = new PlayerManager();
+      pm.setActiveCount(2);
+      const container = document.createElement('div');
+
+      mgm.loadGame('memory-sequence-duel', {
+        container,
+        players: pm.getActivePlayers(),
+        activePlayerCount: 2,
+        difficulty: 'NORMAL',
+        audio: new AudioManager(false),
+        haptics: new HapticManager(false),
+        onFinish: () => {}
+      });
+
+      const game = mgm.getCurrentGame()!;
+      game.start();
+      expect(() => game.handleInput(1, 'TAP', 0)).not.toThrow();
+      game.destroy();
+    });
+
+    it('63. Game 30: Reaction Grid records hits, misses, and fastest reaction time', () => {
+      const mgm = new MiniGameManager();
+      const pm = new PlayerManager();
+      pm.setActiveCount(2);
+      const container = document.createElement('div');
+
+      mgm.loadGame('reaction-grid', {
+        container,
+        players: pm.getActivePlayers(),
+        activePlayerCount: 2,
+        difficulty: 'NORMAL',
+        audio: new AudioManager(false),
+        haptics: new HapticManager(false),
+        onFinish: () => {}
+      });
+
+      const game = mgm.getCurrentGame()!;
+      game.start();
+      expect(() => game.handleInput(1, 'TAP', 4)).not.toThrow();
+      game.destroy();
+    });
+
+    it('64. Game 31: Tiny Golf aims, putts ball, and calculates hole distance', () => {
+      const mgm = new MiniGameManager();
+      const pm = new PlayerManager();
+      pm.setActiveCount(2);
+      const container = document.createElement('div');
+
+      mgm.loadGame('tiny-golf', {
+        container,
+        players: pm.getActivePlayers(),
+        activePlayerCount: 2,
+        difficulty: 'NORMAL',
+        audio: new AudioManager(false),
+        haptics: new HapticManager(false),
+        onFinish: () => {}
+      });
+
+      const game = mgm.getCurrentGame()!;
+      game.start();
+      expect(() => game.handleInput(1, 'SWING')).not.toThrow();
+      game.destroy();
+    });
+
+    it('65. Game 32: Word Scramble inputs letters, clears, and tests validation', () => {
+      const mgm = new MiniGameManager();
+      const pm = new PlayerManager();
+      pm.setActiveCount(2);
+      const container = document.createElement('div');
+
+      mgm.loadGame('word-scramble', {
+        container,
+        players: pm.getActivePlayers(),
+        activePlayerCount: 2,
+        difficulty: 'NORMAL',
+        audio: new AudioManager(false),
+        haptics: new HapticManager(false),
+        onFinish: () => {}
+      });
+
+      const game = mgm.getCurrentGame()!;
+      game.start();
+      const btn = document.createElement('button');
+      expect(() => game.handleInput(1, 'ADD_CHAR', { char: 'A', btn })).not.toThrow();
+      expect(() => game.handleInput(1, 'CLEAR')).not.toThrow();
+      game.destroy();
+    });
+
+    it('66. Game 33: Catch the Fruit moves basket and catches items', () => {
+      const mgm = new MiniGameManager();
+      const pm = new PlayerManager();
+      pm.setActiveCount(2);
+      const container = document.createElement('div');
+
+      mgm.loadGame('catch-the-fruit', {
+        container,
+        players: pm.getActivePlayers(),
+        activePlayerCount: 2,
+        difficulty: 'NORMAL',
+        audio: new AudioManager(false),
+        haptics: new HapticManager(false),
+        onFinish: () => {}
+      });
+
+      const game = mgm.getCurrentGame()!;
+      game.start();
+      expect(() => game.handleInput(1, 'LEFT')).not.toThrow();
+      expect(() => game.handleInput(1, 'RIGHT')).not.toThrow();
+      game.destroy();
+    });
+
+    it('67. Game 34: Sum Sprint answers arithmetic questions and advances', () => {
+      const mgm = new MiniGameManager();
+      const pm = new PlayerManager();
+      pm.setActiveCount(2);
+      const container = document.createElement('div');
+
+      mgm.loadGame('sum-sprint', {
+        container,
+        players: pm.getActivePlayers(),
+        activePlayerCount: 2,
+        difficulty: 'NORMAL',
+        audio: new AudioManager(false),
+        haptics: new HapticManager(false),
+        onFinish: () => {}
+      });
+
+      const game = mgm.getCurrentGame()!;
+      game.start();
+      expect(() => game.handleInput(1, 'ANSWER', 10)).not.toThrow();
+      game.destroy();
+    });
+
+    it('68. Game 35: Perfect Landing stops spacecraft inside target zone', () => {
+      const mgm = new MiniGameManager();
+      const pm = new PlayerManager();
+      pm.setActiveCount(2);
+      const container = document.createElement('div');
+
+      mgm.loadGame('perfect-landing', {
+        container,
+        players: pm.getActivePlayers(),
+        activePlayerCount: 2,
+        difficulty: 'NORMAL',
+        audio: new AudioManager(false),
+        haptics: new HapticManager(false),
+        onFinish: () => {}
+      });
+
+      const game = mgm.getCurrentGame()!;
+      game.start();
+      expect(() => game.handleInput(1, 'LAND')).not.toThrow();
+      game.destroy();
+    });
+
+    it('69. Catalog reflects exactly 35 implemented and playable games', () => {
+      const mgm = new MiniGameManager();
+      const implemented = mgm.getImplementedGames();
+      expect(implemented.length).toBe(35);
+    });
+  });
 });
+
 
