@@ -1,0 +1,325 @@
+import { PlayerManager } from '../services/PlayerManager.ts';
+import { ScoreManager } from '../services/ScoreManager.ts';
+import { AudioManager } from '../services/AudioManager.ts';
+import { HapticManager } from '../services/HapticManager.ts';
+import { MiniGameManager } from '../core/MiniGameManager.ts';
+import { RoundManager, SessionState } from '../core/RoundManager.ts';
+import { ModalsManager } from './Modals.ts';
+import { PartyConfig, GameMetadata, RoundResult, PlayerId } from '../types/index.ts';
+
+export class PartyApp {
+  private playerManager: PlayerManager;
+  private scoreManager: ScoreManager;
+  private audioManager: AudioManager;
+  private hapticManager: HapticManager;
+  private miniGameManager: MiniGameManager;
+  private roundManager: RoundManager;
+  private modals: ModalsManager;
+
+  private appRoot: HTMLElement;
+  private menuView!: HTMLElement;
+  private gameArenaView!: HTMLElement;
+  private introOverlay!: HTMLElement;
+
+  constructor(root: HTMLElement) {
+    this.appRoot = root;
+    this.playerManager = new PlayerManager();
+    this.scoreManager = new ScoreManager(this.playerManager);
+    this.audioManager = new AudioManager(true);
+    this.hapticManager = new HapticManager(true);
+    this.miniGameManager = new MiniGameManager();
+    this.modals = new ModalsManager(
+      this.appRoot,
+      this.playerManager,
+      this.miniGameManager,
+      this.audioManager,
+      this.hapticManager
+    );
+
+    this.roundManager = new RoundManager(
+      this.playerManager,
+      this.scoreManager,
+      this.miniGameManager,
+      this.audioManager,
+      this.hapticManager,
+      {
+        onStateChange: (state, data) => this.handleSessionState(state, data),
+        onRoundComplete: res => this.handleRoundComplete(res),
+        onSessionComplete: lb => this.handleSessionComplete(lb)
+      }
+    );
+
+    this.renderBaseLayout();
+  }
+
+  private renderBaseLayout(): void {
+    this.appRoot.innerHTML = `
+      <div class="app-container">
+        <!-- MAIN MENU -->
+        <div class="view-menu" id="view-menu">
+          <header class="app-top-bar">
+            <div class="app-brand">
+              <span class="brand-badge">50+ MINI-GAMES</span>
+              <h1 class="brand-title">PARTY GAMES</h1>
+            </div>
+            <div class="top-bar-actions">
+              <button class="icon-btn" id="btn-player-pill" title="Configure Players">
+                <span id="player-count-label">👥 2 Players</span>
+              </button>
+              <button class="icon-btn" id="btn-audio-toggle" title="Toggle Sound">🔊</button>
+              <button class="icon-btn" id="btn-settings" title="Settings">⚙️</button>
+            </div>
+          </header>
+
+          <main class="menu-content">
+            <!-- HERO QUICK PLAY -->
+            <div class="hero-card" id="btn-quick-play">
+              <div class="hero-badge">⚡ INSTANT FUN</div>
+              <h2>QUICK PARTY</h2>
+              <p>3 Fast Random Rounds for you and your friends</p>
+              <button class="btn btn-primary btn-glow">PLAY NOW 🎮</button>
+            </div>
+
+            <!-- MODE TILES -->
+            <div class="menu-grid">
+              <div class="menu-tile tile-tournament" id="btn-mode-tournament">
+                <div class="tile-icon">🏆</div>
+                <div class="tile-body">
+                  <h3>Tournament</h3>
+                  <p>7-Round Championship with leaderboard</p>
+                </div>
+              </div>
+
+              <div class="menu-tile tile-custom" id="btn-mode-custom">
+                <div class="tile-icon">🎯</div>
+                <div class="tile-body">
+                  <h3>Custom Party</h3>
+                  <p>Choose rounds & select game categories</p>
+                </div>
+              </div>
+
+              <div class="menu-tile tile-library" id="btn-mode-library">
+                <div class="tile-icon">📚</div>
+                <div class="tile-body">
+                  <h3>Game Library</h3>
+                  <p>Explore 55 games & play any directly</p>
+                </div>
+              </div>
+
+              <div class="menu-tile tile-players" id="btn-mode-players">
+                <div class="tile-icon">👥</div>
+                <div class="tile-body">
+                  <h3>Players & Avatars</h3>
+                  <p>Customize names, colors & pick 1-4 players</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- ACTIVE PLAYERS PREVIEW STRIP -->
+            <div class="players-strip" id="active-players-strip"></div>
+          </main>
+        </div>
+
+        <!-- GAME ARENA VIEW -->
+        <div class="view-arena hidden" id="view-arena">
+          <div class="arena-top-nav">
+            <button class="icon-btn" id="btn-abort-game" title="Quit to Menu">✕</button>
+            <div class="arena-round-indicator" id="arena-round-tag">Round 1 / 3</div>
+            <div class="arena-empty-slot"></div>
+          </div>
+
+          <div class="game-viewport" id="game-viewport"></div>
+
+          <!-- INTRO & COUNTDOWN OVERLAY -->
+          <div class="game-intro-overlay hidden" id="game-intro-overlay"></div>
+        </div>
+      </div>
+    `;
+
+    this.menuView = this.appRoot.querySelector('#view-menu')!;
+    this.gameArenaView = this.appRoot.querySelector('#view-arena')!;
+    this.introOverlay = this.appRoot.querySelector('#game-intro-overlay')!;
+
+    this.bindMenuEvents();
+    this.updatePlayersStrip();
+  }
+
+  private bindMenuEvents(): void {
+    // Quick Play
+    this.appRoot.querySelector('#btn-quick-play')?.addEventListener('click', () => {
+      this.audioManager.playStart();
+      this.startParty({
+        playerCount: this.playerManager.getActiveCount(),
+        totalRounds: 3,
+        mode: 'QUICK',
+        categories: ['REACTION', 'SPEED', 'COMPETITION', 'MEMORY']
+      });
+    });
+
+    // Tournament
+    this.appRoot.querySelector('#btn-mode-tournament')?.addEventListener('click', () => {
+      this.audioManager.playTap();
+      this.modals.showPartySetup('TOURNAMENT', config => this.startParty(config));
+    });
+
+    // Custom Party
+    this.appRoot.querySelector('#btn-mode-custom')?.addEventListener('click', () => {
+      this.audioManager.playTap();
+      this.modals.showPartySetup('CUSTOM', config => this.startParty(config));
+    });
+
+    // Game Library
+    this.appRoot.querySelector('#btn-mode-library')?.addEventListener('click', () => {
+      this.audioManager.playTap();
+      this.modals.showGameLibrary(gameId => {
+        this.startParty({
+          playerCount: this.playerManager.getActiveCount(),
+          totalRounds: 1,
+          mode: 'SINGLE',
+          categories: [],
+          specificGameId: gameId
+        });
+      });
+    });
+
+    // Players Modal
+    const openPlayers = () => {
+      this.audioManager.playTap();
+      this.modals.showPlayerSetup(() => {
+        this.updatePlayersStrip();
+      });
+    };
+    this.appRoot.querySelector('#btn-player-pill')?.addEventListener('click', openPlayers);
+    this.appRoot.querySelector('#btn-mode-players')?.addEventListener('click', openPlayers);
+
+    // Audio toggle
+    let isMuted = false;
+    const audioBtn = this.appRoot.querySelector('#btn-audio-toggle') as HTMLElement;
+    audioBtn?.addEventListener('click', () => {
+      isMuted = !isMuted;
+      this.audioManager.toggleMute(!isMuted);
+      audioBtn.textContent = isMuted ? '🔇' : '🔊';
+    });
+
+    // Settings
+    this.appRoot.querySelector('#btn-settings')?.addEventListener('click', () => {
+      this.audioManager.playTap();
+      this.modals.showSettings(isMuted, muted => {
+        isMuted = muted;
+        this.audioManager.toggleMute(!isMuted);
+        if (audioBtn) audioBtn.textContent = isMuted ? '🔇' : '🔊';
+      });
+    });
+
+    // Abort game
+    this.appRoot.querySelector('#btn-abort-game')?.addEventListener('click', () => {
+      if (confirm('Quit back to main menu?')) {
+        this.roundManager.endSession();
+        this.showMenu();
+      }
+    });
+  }
+
+  private updatePlayersStrip(): void {
+    const strip = this.appRoot.querySelector('#active-players-strip');
+    const label = this.appRoot.querySelector('#player-count-label');
+    const players = this.playerManager.getActivePlayers();
+
+    if (label) {
+      label.textContent = `👥 ${players.length} ${players.length === 1 ? 'Solo' : 'Players'}`;
+    }
+
+    if (strip) {
+      strip.innerHTML = players
+        .map(
+          p => `
+        <div class="player-chip-badge" style="--p-color: ${p.color}">
+          <span class="chip-avatar">${p.avatar}</span>
+          <span class="chip-name">${p.name}</span>
+        </div>
+      `
+        )
+        .join('');
+    }
+  }
+
+  private startParty(config: PartyConfig): void {
+    this.menuView.classList.add('hidden');
+    this.gameArenaView.classList.remove('hidden');
+    this.roundManager.startSession(config);
+  }
+
+  private handleSessionState(state: SessionState, data?: unknown): void {
+    const roundTag = this.appRoot.querySelector('#arena-round-tag');
+    if (roundTag) {
+      roundTag.textContent = `Round ${this.roundManager.getCurrentRound()} / ${this.roundManager.getTotalRounds()}`;
+    }
+
+    if (state === 'INTRO') {
+      const introData = data as { roundNumber: number; totalRounds: number; game: GameMetadata };
+      this.showIntroOverlay(introData.game);
+    } else if (state === 'PLAYING') {
+      this.introOverlay.classList.add('hidden');
+    }
+  }
+
+  private showIntroOverlay(game: GameMetadata): void {
+    this.introOverlay.classList.remove('hidden');
+    this.introOverlay.innerHTML = `
+      <div class="intro-card">
+        <div class="intro-category-badge">${game.category}</div>
+        <div class="intro-icon">${game.icon}</div>
+        <h2 class="intro-title">${game.title}</h2>
+        <h3 class="intro-title-ar">${game.titleAr}</h3>
+        <p class="intro-desc">${game.instructions}</p>
+
+        <div class="countdown-circle" id="countdown-circle">
+          <span id="countdown-num">Ready</span>
+        </div>
+      </div>
+    `;
+
+    const countdownNum = this.introOverlay.querySelector('#countdown-num')!;
+    let count = 3;
+
+    // 3, 2, 1, GO!
+    const timer = setInterval(() => {
+      if (count > 0) {
+        countdownNum.textContent = count.toString();
+        this.audioManager.playCountdown(count);
+        this.hapticManager.medium();
+        count--;
+      } else {
+        clearInterval(timer);
+        countdownNum.textContent = 'GO!';
+        countdownNum.classList.add('go');
+        this.audioManager.playCountdown(0);
+        this.hapticManager.heavy();
+
+        setTimeout(() => {
+          this.introOverlay.classList.add('hidden');
+          const viewport = this.appRoot.querySelector('#game-viewport') as HTMLElement;
+          this.roundManager.launchGame(viewport);
+        }, 500);
+      }
+    }, 900);
+  }
+
+  private handleRoundComplete(result: RoundResult): void {
+    this.modals.showRoundResults(result, () => {
+      this.roundManager.nextRound();
+    });
+  }
+
+  private handleSessionComplete(leaderboard: { playerId: PlayerId; totalPoints: number; rank: number }[]): void {
+    this.modals.showGrandWinner(leaderboard, () => {
+      this.showMenu();
+    });
+  }
+
+  private showMenu(): void {
+    this.gameArenaView.classList.add('hidden');
+    this.menuView.classList.remove('hidden');
+    this.updatePlayersStrip();
+  }
+}
