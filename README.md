@@ -89,6 +89,125 @@ A production-ready local multiplayer mini-game platform engineered for mobile ph
 
 ---
 
+
+## 📱 Android App (Capacitor + TWA)
+
+المشروع مضبوط كـ **PWA + تطبيق أندرويد جاهز للنشر** عبر خيارين متكاملين:
+
+### الخيار 1: Capacitor (موصى به — WebView محلي offline)
+
+يحوّل الـ PWA إلى تطبيق أندرويد Native يضم الـ `dist/` داخل الـ APK/AAB ويعمل offline بالكامل دون الحاجة لاستضافة.
+
+**المتطلبات:**
+- Node.js 18+ / npm
+- Android Studio + Android SDK (API 24+)
+- JDK 17 (مطلوب لـ Gradle 8+)
+
+**التثبيت (تم بالفعل في هذا المشروع):**
+```bash
+npm install                          # يثبت @capacitor/core @capacitor/cli @capacitor/android
+# تم إنشاء capacitor.config.ts و android/ عبر:
+npx cap add android
+```
+
+**البناء:**
+```bash
+npm run build                # يبني الويب إلى dist/
+npx cap sync android         # ينسخ dist/ إلى android/app/src/main/assets/public
+
+# فتح Android Studio
+npm run cap:open             # أو: npx cap open android
+
+# داخل Android Studio أو عبر CLI:
+npm run android:apk:debug    # APK للاختبار: android/app/build/outputs/apk/debug/app-debug.apk
+npm run android:apk:release  # APK للإصدار
+npm run android:aab          # AAB لـ Play Store (مطلوب): android/app/build/outputs/bundle/release/app-release.aab
+```
+
+**توقيع الإصدار (Release Signing):**
+1. أنشئ keystore:
+   ```bash
+   keytool -genkey -v -keystore android.keystore -alias android -keyalg RSA -keysize 2048 -validity 10000
+   ```
+2. احسب SHA256 fingerprint:
+   ```bash
+   keytool -list -v -keystore android.keystore -alias android | grep SHA256
+   ```
+3. ضع البصمة في `public/.well-known/assetlinks.json` (انظر القسم التالي) وارفع المشروع.
+4. في `android/gradle.properties` أو عبر Android Studio > Build > Generate Signed Bundle/APK، حدد موقع keystore.
+
+> `android/` مجلد native تم إنشاؤه — لا تعدل ملفاته يدويا إلا للـ signing. لإعادة التوليد: احذف `android/` ثم `npx cap add android && npx cap sync android`.
+
+---
+
+### الخيار 2: Trusted Web Activity (TWA) via Bubblewrap
+
+لمن يريد نشر PWA مستضاف على دومين عبر Play Store بدون WebView مضمن — TWA يفتح PWA في Chrome بملء الشاشة.
+
+**الملفات المجهزة:**
+- `twa-manifest.json` — إعداد Bubblewrap (عدّل `host` و `webManifestUrl` و `iconUrl` إلى دومينك الحقيقي)
+- `public/.well-known/assetlinks.json` — إثبات ملكية الدومين (Digital Asset Links)
+
+**الخطوات:**
+```bash
+# ثبت Bubblewrap
+npm i -g @bubblewrap/cli
+# أو npx @bubblewrap/cli
+
+# حدث twa-manifest.json: غيّر host و webManifestUrl و iconUrl لدومينك
+# ثم:
+bubblewrap init --manifest https://example.com/manifest.webmanifest
+# أو استخدم الملف الجاهز:
+bubblewrap build --manifest twa-manifest.json
+
+# بديل: استورد twa-manifest.json في PWABuilder.com
+```
+
+**مهم — ربط الدومين:**
+- استضف الموقع على `https://YOUR_DOMAIN/` مع `manifest.webmanifest` و ملف `/.well-known/assetlinks.json`.
+- في `assetlinks.json` استبدل `REPLACE_WITH_SHA256_FINGERPRINT_FROM_KEYSTORE` ببصمة الشهادة (Play App Signing أو keystore المحلي).
+- يمكن استخراج البصمة من Play Console > Setup > App signing بعد أول رفع.
+
+---
+
+### PWA Manifest (متوافق مع Play Store)
+
+`public/manifest.webmanifest` يتضمن الآن:
+- `name` / `short_name` / `description` / `categories`
+- `icons`: `icon-192.png` (any) + `icon-512.png` (any) + `icon-512-maskable.png` (maskable) + `icon.svg` + `apple-touch-icon.png`
+- `screenshots` (narrow/wide) — استبدل الصور النائبة بلقطات حقيقية قبل النشر
+- `shortcuts` (Quick Party + Library)
+- `display: standalone`, `theme_color` / `background_color: #0a0c16`, `start_url` / `scope`
+
+### Service Worker — Offline كامل مع كاش الصور
+
+`public/sw.js` (v4):
+- App Shell cache-first (`/`, `/index.html`, manifest, icons)
+- صور `covers/` و `screenshots` في cache منفصل `party-images-v1` (cache-first + stale-while-revalidate، مقيد بـ 250 عنصر)
+- أصول Vite المُجزأة `/assets/*.js|css` cache-first (immutable)
+- تنقل network-first مع `navigationPreload` و fallback إلى `/index.html`
+
+### الأيقونات
+
+- `public/icon.svg` (متجه المصدر)
+- `public/icon-192.png` / `icon-512.png` / `icon-512-maskable.png` (مولدة بـ sharp من SVG)
+- `public/apple-touch-icon.png` / `favicon-32.png`
+- `public/screenshots/narrow.png` (1080×1920) و `wide.png` (1920×1080) — **استبدلها بلقطات حقيقية**
+- `android/app/src/main/res/mipmap-*/ic_launcher*.png` — أيقونات adaptive مولدة تلقائيا
+
+### إعدادات Capacitor
+
+`capacitor.config.ts`:
+```ts
+appId: 'com.partygames.collection'
+appName: 'Party Game Collection'
+webDir: 'dist'
+android.backgroundColor: '#0a0c16'
+```
+
+> لتغيير `appId` مستقبلا: حدث `capacitor.config.ts` + `android/app/build.gradle` + `android/app/src/main/res/values/strings.xml` + `assetlinks.json`.
+
+
 ## 🏗️ Architecture
 
 ```

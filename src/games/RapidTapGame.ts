@@ -1,6 +1,7 @@
 import { BaseMiniGame } from '../core/MiniGame.ts';
 import { GameMetadata, MiniGameResult, PlayerId } from '../types/index.ts';
 import { GAME_CATALOG } from '../catalog/gameCatalog.ts';
+import * as GFX from '../utils/Gfx.ts';
 
 export class RapidTapGame extends BaseMiniGame {
   readonly metadata: GameMetadata = GAME_CATALOG.find(g => g.id === 'rapid-tap')!;
@@ -8,6 +9,11 @@ export class RapidTapGame extends BaseMiniGame {
   private timeLeft = 5.0; // 5-second rapid frenzy
   private playerTaps: Record<PlayerId, number> = { 1: 0, 2: 0, 3: 0, 4: 0 };
   private timerEl!: HTMLElement;
+  private gfxCanvas!: HTMLCanvasElement;
+  private gfxCtx!: CanvasRenderingContext2D;
+  private gfxParticles: GFX.Particle[]=[];
+  private gfxT=0;
+  private handleGfxResize=():void=>{ if(this.gfxCanvas) GFX.resizeCanvasToParent(this.gfxCanvas); };
 
   protected onInit(): void {
     const players = this.context.players;
@@ -44,6 +50,10 @@ export class RapidTapGame extends BaseMiniGame {
       </div>
     `;
 
+    this.gfxCanvas = GFX.createOverlayCanvas(this.container,'gfx-rt',0,true);
+    this.gfxCtx=this.gfxCanvas.getContext('2d')!;
+    GFX.resizeCanvasToParent(this.gfxCanvas);
+    window.addEventListener('resize', this.handleGfxResize);
     this.timerEl = this.container.querySelector('#rt-timer')!;
 
     // Multi-touch input listener
@@ -61,8 +71,23 @@ export class RapidTapGame extends BaseMiniGame {
   }
 
   update(deltaTime: number): void {
+    // GFX backdrop
+    if (this.gfxCtx && this.gfxCanvas) {
+      this.gfxT += deltaTime*1000;
+      GFX.resizeCanvasToParent(this.gfxCanvas);
+      const w=this.gfxCanvas.width,h=this.gfxCanvas.height,dpr=Math.min(window.devicePixelRatio||1,2);
+      const tRatio = 1 - (this.timeLeft/5.0);
+      const pal = tRatio>0.7 ? ['#1a0a12','#7c2d12','#f59e0b'] : ['#0a0c16','#1e1b4b','#312e81'];
+      GFX.drawAnimatedGradient(this.gfxCtx,this.gfxT,w,h,pal as any);
+      // pulse vignette by time
+      const vg=this.gfxCtx.createRadialGradient(w/2,h/2, Math.min(w,h)*0.3, w/2,h/2, Math.max(w,h)*0.8);
+      vg.addColorStop(0,'rgba(255,255,255,0)'); vg.addColorStop(1,'rgba(0,0,0,0.46)');
+      this.gfxCtx.fillStyle=vg; this.gfxCtx.fillRect(0,0,w,h);
+      GFX.drawStars(this.gfxCtx,this.gfxT,w,h,34,dpr);
+      GFX.updateParticles(this.gfxParticles,deltaTime,680);
+      GFX.drawParticles(this.gfxCtx,this.gfxParticles,dpr);
+    }
     if (!this.isRunning || this.isFinished) return;
-
     this.timeLeft -= deltaTime;
     if (this.timeLeft <= 0) {
       this.timeLeft = 0;
@@ -70,9 +95,9 @@ export class RapidTapGame extends BaseMiniGame {
       this.finishGame();
       return;
     }
-
     this.timerEl.textContent = `${this.timeLeft.toFixed(1)}s`;
   }
+  protected onDestroy(): void { window.removeEventListener('resize', this.handleGfxResize); }
 
   handleInput(playerId: PlayerId, action: string): void {
     if (action !== 'TAP' || !this.isRunning || this.isFinished) return;
@@ -83,6 +108,7 @@ export class RapidTapGame extends BaseMiniGame {
     // Audio & haptic
     this.context.audio.playTap();
     this.context.haptics.light();
+    { const rect=this.container.getBoundingClientRect(); const ze=this.container.querySelector(`[data-player-id="${playerId}"]`)?.getBoundingClientRect(); if(ze){ const dpr=Math.min(window.devicePixelRatio||1,2); const cx=(ze.left+ze.width/2-rect.left)*dpr; const cy=(ze.top+ze.height*0.55-rect.top)*dpr; const col=this.context.players.find(pp=>pp.id===playerId)?.color||'#6366f1'; GFX.spawnBurst(this.gfxParticles,cx,cy,col,8,190,dpr); if(taps%10===0) GFX.spawnBurst(this.gfxParticles,cx,cy-18*dpr,'#facc15',14,260,dpr); } }
 
     // Visual feedback
     const scoreEl = this.container.querySelector(`#rt-score-${playerId}`);

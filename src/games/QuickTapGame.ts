@@ -1,6 +1,7 @@
 import { BaseMiniGame } from '../core/MiniGame.ts';
 import { GameMetadata, MiniGameResult, PlayerId } from '../types/index.ts';
 import { GAME_CATALOG } from '../catalog/gameCatalog.ts';
+import * as GFX from '../utils/Gfx.ts';
 
 export class QuickTapGame extends BaseMiniGame {
   readonly metadata: GameMetadata = GAME_CATALOG.find(g => g.id === 'quick-tap')!;
@@ -13,6 +14,11 @@ export class QuickTapGame extends BaseMiniGame {
   private signalEl!: HTMLElement;
   private statusEl!: HTMLElement;
   private playerZonesEl!: HTMLElement;
+  private gfxCanvas!: HTMLCanvasElement;
+  private gfxCtx!: CanvasRenderingContext2D;
+  private gfxParticles: GFX.Particle[] = [];
+  private gfxT = 0;
+  private handleGfxResize = (): void => { if (this.gfxCanvas) GFX.resizeCanvasToParent(this.gfxCanvas); };
 
   protected onInit(): void {
     const players = this.context.players;
@@ -43,6 +49,12 @@ export class QuickTapGame extends BaseMiniGame {
           .join('')}
       </div>
     `;
+
+    // PREMIUM GFX — animated backdrop + particles overlay (60fps, dpr<=2)
+    this.gfxCanvas = GFX.createOverlayCanvas(this.container, 'gfx-qt', 0, true);
+    this.gfxCtx = this.gfxCanvas.getContext('2d')!;
+    GFX.resizeCanvasToParent(this.gfxCanvas);
+    window.addEventListener('resize', this.handleGfxResize);
 
     this.signalEl = this.container.querySelector('#qt-signal')!;
     this.statusEl = this.container.querySelector('#qt-status')!;
@@ -90,6 +102,25 @@ export class QuickTapGame extends BaseMiniGame {
     this.context.haptics.heavy();
   }
 
+  update(deltaTime: number): void {
+    if (this.gfxCtx && this.gfxCanvas) {
+      this.gfxT += deltaTime * 1000;
+      GFX.resizeCanvasToParent(this.gfxCanvas);
+      const w=this.gfxCanvas.width, h=this.gfxCanvas.height;
+      const dpr=Math.min(window.devicePixelRatio||1,2);
+      const pal = this.state==='TRIGGERED' ? ['#052e1a','#0a7a3a','#22c55e'] : this.state==='FINISHED' ? ['#0f172a','#1e293b','#334155'] : ['#0a0c16','#141829','#1e1b4b'];
+      GFX.drawAnimatedGradient(this.gfxCtx,this.gfxT,w,h,pal as any);
+      this.gfxCtx.fillStyle='rgba(255,255,255,0.04)';
+      // subtle radial vignette
+      const vg=this.gfxCtx.createRadialGradient(w/2,h/2,Math.min(w,h)*0.35,w/2,h/2,Math.max(w,h)*0.75);
+      vg.addColorStop(0,'rgba(255,255,255,0)'); vg.addColorStop(1,'rgba(0,0,0,0.45)');
+      this.gfxCtx.fillStyle=vg; this.gfxCtx.fillRect(0,0,w,h);
+      GFX.drawStars(this.gfxCtx,this.gfxT,w,h,38,dpr);
+      GFX.updateParticles(this.gfxParticles,deltaTime, 720);
+      GFX.drawParticles(this.gfxCtx,this.gfxParticles,dpr);
+    }
+  }
+
   handleInput(playerId: PlayerId, action: string): void {
     if (action !== 'TAP') return;
     if (this.isFinished) return;
@@ -102,6 +133,7 @@ export class QuickTapGame extends BaseMiniGame {
         this.falseStarts.add(playerId);
         this.context.audio.playError();
         this.context.haptics.error();
+        { const rect=this.container.getBoundingClientRect(); const z=this.container.querySelector(`[data-player-id="${playerId}"]`)?.getBoundingClientRect(); if(z){ const dpr=Math.min(window.devicePixelRatio||1,2); const cx=(z.left+z.width/2-rect.left)*dpr; const cy=(z.top+z.height/2-rect.top)*dpr; GFX.spawnBurst(this.gfxParticles,cx,cy,'#ef4444',10,180,dpr); } }
         if (timeBadge) {
           timeBadge.textContent = 'FALSE START! (-5)';
           timeBadge.className = 'qt-time-badge error';
@@ -117,6 +149,7 @@ export class QuickTapGame extends BaseMiniGame {
 
       this.context.audio.playSuccess();
       this.context.haptics.light();
+      { const rect=this.container.getBoundingClientRect(); const z=this.container.querySelector(`[data-player-id="${playerId}"]`)?.getBoundingClientRect(); if(z){ const dpr=Math.min(window.devicePixelRatio||1,2); const cx=(z.left+z.width/2-rect.left)*dpr; const cy=(z.top+z.height/2-rect.top)*dpr; GFX.spawnBurst(this.gfxParticles,cx,cy, (this.context.players.find(pp=>pp.id===playerId)?.color||'#22c55e'), 16, 260, dpr); } }
 
       if (timeBadge) {
         timeBadge.textContent = `${reactionTime} ms`;
@@ -177,6 +210,7 @@ export class QuickTapGame extends BaseMiniGame {
   }
 
   protected onDestroy(): void {
+    window.removeEventListener('resize', this.handleGfxResize);
     if (this.timerId !== null) {
       clearTimeout(this.timerId);
       this.timerId = null;

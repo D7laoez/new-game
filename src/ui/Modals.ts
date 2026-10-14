@@ -39,10 +39,24 @@ import {
 } from '../types/index.ts';
 
 import confetti from 'canvas-confetti';
+import { DailyChallengeService } from '../services/DailyChallengeService.ts';
+import { LeaderboardService, LeaderboardPeriod } from '../services/LeaderboardService.ts';
+import { CoinShopService } from '../services/CoinShopService.ts';
+import { BracketService, TournamentBracketState } from '../services/BracketService.ts';
+import { TutorialService } from '../services/TutorialService.ts';
 
 
 
 export class ModalsManager {
+
+  // ── Pro Max: vivid category palette (Linear × Stripe store badges) ──
+  private static CAT_COLOR: Record<string,string> = {
+    REACTION: '#ef4444', SPEED: '#f59e0b', COMPETITION: '#6366f1', MEMORY: '#8b5cf6',
+    PUZZLE: '#06b6d4', PARTY: '#ec4899', DRAWING: '#10b981', REFLEX: '#f97316',
+    SKILL: '#3b82f6', BRAIN: '#a855f7', TIMING: '#eab308',
+  };
+  private catColor(cat: string): string { return (ModalsManager.CAT_COLOR[cat] ?? '#6366f1'); }
+
 
   private static FAVORITES_KEY = 'favorite_game_ids';
 
@@ -68,8 +82,12 @@ export class ModalsManager {
 
     private achievementManager?: AchievementManager,
 
-    private historyService?: GameHistoryService
-
+    private historyService?: GameHistoryService,
+    private dailyService?: DailyChallengeService,
+    private leaderboardService?: LeaderboardService,
+    private coinService?: CoinShopService,
+    private bracketService?: BracketService,
+    private tutorialService?: TutorialService
   ) {}
 
 
@@ -630,7 +648,7 @@ export class ModalsManager {
 
         <div class="modal-header">
 
-          <span class="preview-cat-badge">${game.category}</span>
+          <span class="preview-cat-badge" style="--cat-color:${this.catColor(game.category)};background:color-mix(in srgb, ${this.catColor(game.category)} 16%, transparent);color:${this.catColor(game.category)};border:1px solid color-mix(in srgb, ${this.catColor(game.category)} 28%, transparent)">${game.category}</span>
 
           <button class="modal-close-btn" id="m-preview-close">&times;</button>
 
@@ -638,7 +656,7 @@ export class ModalsManager {
 
 
 
-        <img class="preview-cover" src="${game.cover || `/covers/${game.id}.svg`}" alt="${game.title}" style="width:100%;height:160px;object-fit:cover;border-radius:14px;margin-bottom:12px" onerror="this.style.display='none'" />
+        <img class="preview-cover" src="${game.cover || `/covers/${game.id}.jpg`}" alt="${game.title}" style="width:100%;height:160px;object-fit:cover;border-radius:14px;margin-bottom:12px" onerror="this.onerror=null;this.src='/covers/${game.id}.svg'" />
         <div class="preview-hero">
 
           <div class="preview-icon">${game.icon}</div>
@@ -904,6 +922,7 @@ export class ModalsManager {
           const isFav = favorites.includes(g.id);
 
           const isCompatible = !g.supportedPlayers || g.supportedPlayers.includes(activePlayerCount);
+          const cCol = this.catColor(g.category);
 
 
 
@@ -911,7 +930,8 @@ export class ModalsManager {
 
           <div class="game-catalog-card ${g.implemented ? 'playable' : 'coming-soon'} ${!isCompatible ? 'incompatible' : ''}" data-id="${g.id}">
 
-            <img class="game-cover" src="${g.cover || `/covers/${g.id}.svg`}" alt="${g.title}" loading="lazy" onerror="this.style.display='none'" />
+            <img class="game-cover" src="${g.cover || `/covers/${g.id}.jpg`}" alt="${g.title}" loading="lazy" onerror="this.onerror=null;this.src='/covers/${g.id}.svg'" />
+            <span class="cat-badge" style="--cat-color:${cCol}">${g.category}</span>
             <div class="card-top-row">
 
               <span class="card-icon">${g.icon}</span>
@@ -1246,7 +1266,39 @@ export class ModalsManager {
 
     }
 
-    overlay.querySelector('#m-set-close')?.addEventListener('click', () => overlay.remove());
+
+    const musicStored = StorageService.getItem<boolean>('app_music_enabled', true);
+    const musicBtn = overlay.querySelector('#toggle-music') as HTMLElement;
+    const syncMusic = () => { const on = StorageService.getItem<boolean>('app_music_enabled', true); if(musicBtn){ musicBtn.className='toggle-switch'+(on?' on':''); musicBtn.textContent=on?'ON 🎵':'OFF'; } };
+    syncMusic();
+    musicBtn?.addEventListener('click', () => {
+      const cur = StorageService.getItem<boolean>('app_music_enabled', true);
+      const next = !cur;
+      StorageService.setItem('app_music_enabled', next);
+      (this.audio as any).setMusicEnabled?.(next);
+      if(next) (this.audio as any).playMusic?.(); else (this.audio as any).stopMusic?.();
+      syncMusic(); this.audio.playTap();
+    });
+    const volSound = overlay.querySelector('#vol-sound') as HTMLInputElement;
+    const volMusic = overlay.querySelector('#vol-music') as HTMLInputElement;
+    if (volSound) {
+      const vs = StorageService.getItem<number>('app_volume', 80);
+      volSound.value = String(vs);
+      volSound.addEventListener('input', () => {
+        const v = parseInt(volSound.value,10)/100;
+        this.audio.setVolume(v); StorageService.setItem('app_volume', parseInt(volSound.value,10));
+      });
+    }
+    if (volMusic) {
+      const vm = StorageService.getItem<number>('app_music_volume', 22);
+      volMusic.value = String(vm);
+      volMusic.addEventListener('input', () => {
+        const v = parseInt(volMusic.value,10)/100;
+        (this.audio as any).setMusicVolume?.(v); StorageService.setItem('app_music_volume', parseInt(volMusic.value,10));
+      });
+    }
+
+        overlay.querySelector('#m-set-close')?.addEventListener('click', () => overlay.remove());
 
     overlay.querySelector('#m-set-done')?.addEventListener('click', () => overlay.remove());
 
@@ -2312,6 +2364,184 @@ this.root.appendChild(overlay);
 
   }
 
+
+
+
+  // ========== DAILY CHALLENGES ==========
+  showDailyChallenges(): void {
+    if (!this.dailyService || !this.coinService) return;
+    const svc = this.dailyService;
+    const coinSvc = this.coinService;
+    const state = svc.getState();
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-backdrop';
+    const pct = svc.getProgressPercent();
+    const cards = state.challenges.map((ch: any) => {
+      const progPct = Math.round((ch.progress / ch.target) * 100);
+      const action = ch.claimed ? '<span class="badge-unlocked">✅ Claimed</span>' : ch.completed ? '<button class="btn btn-primary btn-small daily-claim" data-id="'+ch.id+'">Claim +'+ch.rewardCoins+' 🪙</button>' : '<span class="badge-locked">'+ch.progress+'/'+ch.target+'</span>';
+      return '<div class="achievement-row '+(ch.completed?'unlocked':'locked')+'">'
+        +'<div class="ach-icon">'+ch.icon+'</div>'
+        +'<div class="ach-info"><div class="ach-title-row"><h4>'+escapeHtml(ch.title)+'</h4><span class="ach-title-ar">'+escapeHtml(ch.titleAr)+'</span></div><p class="ach-desc">'+escapeHtml(ch.description)+'</p>'
+        +'<div class="daily-prog"><div class="daily-prog-track"><div class="daily-prog-fill" style="width:'+progPct+'%"></div></div><span class="daily-prog-label">'+progPct+'%</span></div></div>'
+        +'<div class="ach-status">'+action+'</div></div>';
+    }).join('');
+    overlay.innerHTML = '<div class="modal-card modal-daily"><div class="modal-header"><h2>🎯 Daily Challenges</h2><button class="modal-close-btn" id="m-daily-close">&times;</button></div>'
+      +'<div class="daily-meta"><span>Streak: 🔥 '+state.streak+' days</span><span>Total completed: '+state.totalCompleted+'</span><span>Today: '+pct+'%</span></div>'
+      +'<div class="achievements-progress-bar"><div class="ach-prog-fill" style="width:'+pct+'%"></div></div>'
+      +'<div class="achievements-list">'+cards+'</div>'
+      +'<div class="modal-actions"><button class="btn btn-secondary" id="daily-claim-all">Claim All</button><button class="btn btn-primary" id="daily-done">Done</button></div></div>';
+    this.root.appendChild(overlay);
+    const refresh = () => { overlay.remove(); this.showDailyChallenges(); };
+    overlay.querySelector('#m-daily-close')?.addEventListener('click', ()=> { this.audio.playTap(); overlay.remove(); });
+    overlay.querySelector('#daily-done')?.addEventListener('click', ()=> { this.audio.playTap(); overlay.remove(); });
+    overlay.querySelector('#daily-claim-all')?.addEventListener('click', ()=> {
+      const total = svc.claimAll();
+      if (total>0) { coinSvc.addCoins(total); this.audio.playCoin(); this.haptics.coin(); }
+      refresh();
+    });
+    overlay.querySelectorAll('.daily-claim').forEach(b=> b.addEventListener('click', ()=>{
+      const id = b.getAttribute('data-id')!;
+      const coins = svc.claim(id);
+      if (coins>0) { coinSvc.addCoins(coins); this.audio.playCoin(); this.haptics.coin(); }
+      refresh();
+    }));
+  }
+
+  // ========== LEADERBOARD ==========
+  showLeaderboard(): void {
+    if (!this.leaderboardService) return;
+    const svc = this.leaderboardService;
+    let period: LeaderboardPeriod = 'ALL';
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-backdrop';
+    const render = () => {
+      const agg = svc.getAggregated(period);
+      const recent = svc.getRecent(12, period);
+      overlay.innerHTML = '<div class="modal-card modal-leaderboard"><div class="modal-header"><h2>👑 Leaderboard</h2><button class="modal-close-btn" id="m-lb-close">&times;</button></div>'
+        +'<div class="count-pill-group" id="lb-period">'
+        +['ALL','WEEK','MONTH'].map(p=> '<button class="count-pill '+(p===period?'active':'')+'" data-period="'+p+'">'+p+'</button>').join('')
+        +'</div>'
+        +'<h3 style="margin-top:10px">🏆 Overall ('+period+')</h3>'
+        + (agg.length? '<div class="leaderboard-table">'+agg.map((e: any,i: number)=> '<div class="leaderboard-row rank-'+(i+1)+'" style="--p-color:'+(this.playerManager.getPlayer(e.playerId)?.color||'#6366f1')+'"><div class="row-rank">#'+(i+1)+'</div><div class="row-player"><span class="row-avatar">'+(this.playerManager.getPlayer(e.playerId)?.avatar||'👤')+'</span><span class="row-name">'+escapeHtml(e.playerName)+'</span></div><div class="row-total-pts">'+e.totalPoints+' pts • '+e.sessions+' sessions • avg '+e.avgPoints+'</div><div class="row-round-pts">'+e.wins+' wins</div></div>').join('')+'</div>' : '<div class="lib-empty">No data yet for this period.</div>')
+        +'<h3 style="margin-top:14px">🕘 Recent Sessions</h3>'
+        + (recent.length? '<div class="history-list" style="max-height:220px;overflow:auto">'+recent.map((r: any)=> '<div class="history-entry"><div class="history-head"><strong>'+escapeHtml(r.playerName)+'</strong> <span class="history-date">'+new Date(r.date).toLocaleDateString()+'</span></div><div class="history-meta">'+r.mode+(r.tournamentCup?' · '+escapeHtml(r.tournamentCup):'')+' • #'+r.rank+' • '+r.totalPoints+' pts</div></div>').join('')+'</div>' : '<div class="lib-empty">No sessions yet.</div>')
+        +'<div class="modal-actions"><button class="btn btn-secondary" id="lb-clear">Clear</button><button class="btn btn-primary" id="lb-done">Done</button></div></div>';
+      overlay.querySelector('#m-lb-close')?.addEventListener('click', ()=> { this.audio.playTap(); overlay.remove(); });
+      overlay.querySelector('#lb-done')?.addEventListener('click', ()=> overlay.remove());
+      overlay.querySelector('#lb-clear')?.addEventListener('click', ()=> { if(confirm('Clear leaderboard?')){ svc.clear(); render(); } });
+      overlay.querySelectorAll('#lb-period .count-pill').forEach(b=> b.addEventListener('click', ()=>{ period = b.getAttribute('data-period') as LeaderboardPeriod; render(); }));
+    };
+    this.root.appendChild(overlay);
+    render();
+  }
+
+  // ========== SHOP ==========
+  showShop(): void {
+    if (!this.coinService) return;
+    const svc = this.coinService;
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-backdrop';
+    const render = () => {
+      const coins = svc.getCoins();
+      const items = svc.getCatalog();
+      const byKind = (k: string) => items.filter((i: any)=>i.kind===k);
+      const st = svc.getState();
+      const card = (it: any) => '<div class="game-catalog-card '+(it.owned?'playable':'coming-soon')+'" style="padding:12px"><div style="font-size:2rem">'+it.icon+'</div><h3>'+escapeHtml(it.name)+'</h3><div class="card-title-ar">'+escapeHtml(it.nameAr)+'</div><p class="card-desc">'+it.kind+' • '+it.price+' 🪙</p>'
+        + (it.owned ? '<span class="badge-live">OWNED</span> '+( (it.kind==='SKIN' && st.activeSkinId===it.id) || (it.kind==='THEME' && st.activeThemeId===it.id) ? '<span class="badge-live" style="background:#6366f1">EQUIPPED</span>' : '<button class="btn btn-primary btn-small shop-equip" data-id="'+it.id+'">Equip</button>') : '<button class="btn btn-primary btn-small shop-buy" data-id="'+it.id+'">Buy</button>')
+        +'</div>';
+      overlay.innerHTML = '<div class="modal-card modal-shop"><div class="modal-header"><h2>🛍️ Shop — 🪙 '+coins+' Coins</h2><button class="modal-close-btn" id="m-shop-close">&times;</button></div>'
+        +'<div class="shop-earn-hint">Earn coins by playing & completing dailies! Win rounds for bonus coins.</div>'
+        +'<h3>✨ Skins</h3><div class="library-grid">'+byKind('SKIN').map(card).join('')+'</div>'
+        +'<h3 style="margin-top:12px">🎨 Themes</h3><div class="library-grid">'+byKind('THEME').map(card).join('')+'</div>'
+        +'<h3 style="margin-top:12px">🎊 Effects</h3><div class="library-grid">'+byKind('EFFECT').map(card).join('')+'</div>'
+        +'<div class="modal-actions"><button class="btn btn-secondary" id="shop-unequip">Unequip Theme</button><button class="btn btn-primary" id="shop-done">Done</button></div></div>';
+      overlay.querySelector('#m-shop-close')?.addEventListener('click', ()=> { this.audio.playTap(); overlay.remove(); });
+      overlay.querySelector('#shop-done')?.addEventListener('click', ()=> overlay.remove());
+      overlay.querySelector('#shop-unequip')?.addEventListener('click', ()=> { svc.equipTheme(null); render(); });
+      overlay.querySelectorAll('.shop-buy').forEach(b=> b.addEventListener('click', ()=>{
+        const id=b.getAttribute('data-id')!; const res=svc.buy(id);
+        if(!res.ok && res.reason==='not_enough_coins') { this.audio.playError(); alert('Not enough coins!'); }
+        else if(res.ok) { this.audio.playCoin(); this.haptics.coin(); render(); } else render();
+      }));
+      overlay.querySelectorAll('.shop-equip').forEach(b=> b.addEventListener('click', ()=>{
+        const id=b.getAttribute('data-id')!; const item=items.find((x: any)=>x.id===id);
+        if(item?.kind==='SKIN') svc.equipSkin(id); else if(item?.kind==='THEME') svc.equipTheme(id);
+        this.audio.playTap(); render();
+      }));
+    };
+    this.root.appendChild(overlay);
+    render();
+  }
+
+  // ========== BRACKET ==========
+  showBracketSetup(onStart: (ids: PlayerId[])=>void): void {
+    const count = this.playerManager.getActiveCount();
+    const players = this.playerManager.getActivePlayers();
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-backdrop';
+    const st = this.bracketService?.getState();
+    overlay.innerHTML = '<div class="modal-card"><div class="modal-header"><h2>⚔️ Bracket Tournament</h2><button class="modal-close-btn" id="m-br-close">&times;</button></div>'
+      + (st && !st.champion ? '<div class="preview-warning" style="margin-bottom:12px">Ongoing bracket: '+(st.matches.map((m: any)=> m.round+': P'+m.p1+' vs P'+m.p2+ (m.winner? ' → P'+m.winner : '') ).join(' · '))+'</div><div class="modal-actions"><button class="btn btn-primary" id="br-continue">Continue Bracket</button><button class="btn btn-secondary" id="br-reset">Reset Bracket</button></div>'
+        : '<p style="color:var(--text-muted)">Single-elimination for '+count+' players. Each duel is 1 fast game.</p><div class="players-strip" style="margin:10px 0">'+players.map(p=>'<span class="player-chip-badge" style="--p-color:'+p.color+'">'+p.avatar+' '+escapeHtml(p.name)+'</span>').join('')+'</div>'
+        + (count<2? '<div class="preview-warning">Need at least 2 players. Add players first.</div>' : '')
+        +'<div class="modal-actions"><button class="btn btn-primary btn-large" id="br-start" '+(count<2?'disabled':'')+'>Start Bracket ⚔️</button></div>')
+      +'<div class="modal-actions" style="margin-top:8px"><button class="btn btn-secondary" id="br-done">Close</button></div></div>';
+    this.root.appendChild(overlay);
+    overlay.querySelector('#m-br-close')?.addEventListener('click', ()=> overlay.remove());
+    overlay.querySelector('#br-done')?.addEventListener('click', ()=> overlay.remove());
+    overlay.querySelector('#br-start')?.addEventListener('click', ()=>{
+      const ids = this.playerManager.getActivePlayers().map(p=>p.id) as PlayerId[];
+      this.audio.playStart(); overlay.remove(); onStart(ids);
+    });
+    overlay.querySelector('#br-continue')?.addEventListener('click', ()=>{
+      const cur = this.bracketService?.getCurrentMatch();
+      if(!cur) { overlay.remove(); return; }
+      this.audio.playTap(); overlay.remove();
+      // resume is handled already via bracketService state; re-enter next match by starting a single game duel
+      const ids = this.playerManager.getActivePlayers().map(p=>p.id) as PlayerId[];
+      onStart(ids);
+    });
+    overlay.querySelector('#br-reset')?.addEventListener('click', ()=>{ if(confirm('Reset bracket?')){ this.bracketService?.clear(); overlay.remove(); this.showBracketSetup(onStart);} });
+  }
+
+  showBracketResult(state: TournamentBracketState, onAgain: ()=>void, onMenu: ()=>void): void {
+    const overlay = document.createElement('div');
+    overlay.className = 'winner-overlay';
+    const champ = this.playerManager.getPlayer(state.champion as PlayerId);
+    overlay.innerHTML = '<div class="winner-card"><div class="winner-trophy">🏆</div><h1 class="winner-title">'+(champ? escapeHtml(champ.name)+' IS CHAMPION!' : 'CHAMPION P'+state.champion)+'</h1>'
+      +'<div class="winner-avatar" style="--p-color:'+(champ?.color||'#FFD700')+'">'+(champ?.avatar||'👑')+'</div>'
+      +'<div class="podium-display">'+state.matches.map((m: any)=> '<div class="podium-step" style="--p-color:#6366f1"><div class="podium-medal">'+m.round+'</div><div class="podium-name">P'+m.p1+' vs P'+m.p2+'</div><div class="podium-score">'+(m.winner? 'Winner P'+m.winner : '—')+'</div></div>').join('')+'</div>'
+      +'<div class="winner-actions-grid"><button class="btn btn-primary" id="br-again">Play Again</button><button class="btn btn-secondary" id="br-menu">Menu</button></div></div>';
+    this.root.appendChild(overlay);
+    try { confetti({ particleCount: 140, spread: 100, origin:{y:0.6} }); } catch {}
+    this.audio.playWinner(); this.haptics.heavy();
+    overlay.querySelector('#br-again')?.addEventListener('click', ()=> { overlay.remove(); onAgain(); });
+    overlay.querySelector('#br-menu')?.addEventListener('click', ()=> { overlay.remove(); onMenu(); });
+  }
+
+  // ========== TUTORIAL ==========
+  showTutorial(gameId: string, onDone: ()=>void): void {
+    const tut = this.tutorialService?.getTutorial(gameId);
+    const meta = this.miniGameManager.getMetadata(gameId);
+    if (!tut || !meta) { onDone(); return; }
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-backdrop';
+    overlay.innerHTML = '<div class="modal-card modal-tutorial"><div class="modal-header"><h2>'+tut.icon+' How to Play: '+escapeHtml(meta.title)+'</h2><button class="modal-close-btn" id="m-tut-close">&times;</button></div>'
+      +'<img class="preview-cover" src="'+(meta.cover||'/covers/'+gameId+'.svg')+'" alt="" onerror="this.style.display=\'none\'" />'
+      +'<ol class="tutorial-steps">'+tut.steps.map((s: any)=>'<li>'+escapeHtml(s)+'</li>').join('')+'</ol>'
+      +'<div class="tutorial-tips">💡 Tips: '+tut.tips.map((t: any)=>escapeHtml(t)).join(' • ')+'</div>'
+      +'<label style="display:flex;gap:8px;align-items:center;margin-top:8px"><input type="checkbox" id="tut-never"/> Don\'t show tutorials again</label>'
+      +'<div class="modal-actions"><button class="btn btn-secondary" id="tut-skip">Skip</button><button class="btn btn-primary btn-large" id="tut-play">Got it — Play! ▶️</button></div></div>';
+    this.root.appendChild(overlay);
+    const finish = () => {
+      const cb = overlay.querySelector('#tut-never') as HTMLInputElement;
+      if (cb?.checked) this.tutorialService?.dismissAll();
+      overlay.remove(); this.audio.playTap(); onDone();
+    };
+    overlay.querySelector('#m-tut-close')?.addEventListener('click', finish);
+    overlay.querySelector('#tut-skip')?.addEventListener('click', finish);
+    overlay.querySelector('#tut-play')?.addEventListener('click', finish);
+  }
 
 
   shareResult(text: string) {

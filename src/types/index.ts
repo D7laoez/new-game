@@ -170,6 +170,13 @@ export interface IAudioManager {
   isEnabled(): boolean;
   setVolume(vol: number): void;
   getVolume(): number;
+  // Background music
+  playMusic(): void;
+  stopMusic(): void;
+  setMusicEnabled(enabled: boolean): void;
+  isMusicEnabled(): boolean;
+  setMusicVolume(vol: number): void;
+  getMusicVolume(): number;
 }
 
 export interface IHapticManager {

@@ -1,0 +1,440 @@
+{
+  "generatedAt": "2026-10-14T10:04:28.151Z",
+  "total": 55,
+  "results": [
+    {
+      "gameId": "quick-tap",
+      "query": "finger pressing button",
+      "photoId": "picsum-quick-tap",
+      "sourceUrl": "https://picsum.photos/seed/quick-tap-cover/640/360",
+      "size": 17947,
+      "status": "ok"
+    },
+    {
+      "gameId": "rapid-tap",
+      "query": "finger tapping fast button",
+      "photoId": "picsum-rapid-tap",
+      "sourceUrl": "https://picsum.photos/seed/rapid-tap-cover/640/360",
+      "size": 45514,
+      "status": "ok"
+    },
+    {
+      "gameId": "tug-of-war",
+      "query": "tug of war rope",
+      "photoId": "picsum-tug-of-war",
+      "sourceUrl": "https://picsum.photos/seed/tug-of-war-cover/640/360",
+      "size": 27087,
+      "status": "ok"
+    },
+    {
+      "gameId": "pattern-memory",
+      "query": "color pattern lights memory game",
+      "photoId": "picsum-pattern-memory",
+      "sourceUrl": "https://picsum.photos/seed/pattern-memory-cover/640/360",
+      "size": 42602,
+      "status": "ok"
+    },
+    {
+      "gameId": "coin-rush",
+      "query": "gold coins pile treasure",
+      "photoId": "picsum-coin-rush",
+      "sourceUrl": "https://picsum.photos/seed/coin-rush-cover/640/360",
+      "size": 27179,
+      "status": "ok"
+    },
+    {
+      "gameId": "color-clash",
+      "query": "colorful paint palette splash",
+      "photoId": "picsum-color-clash",
+      "sourceUrl": "https://picsum.photos/seed/color-clash-cover/640/360",
+      "size": 31869,
+      "status": "ok"
+    },
+    {
+      "gameId": "bomb-pass",
+      "query": "bomb fuse dynamite",
+      "photoId": "picsum-bomb-pass",
+      "sourceUrl": "https://picsum.photos/seed/bomb-pass-cover/640/360",
+      "size": 52161,
+      "status": "ok"
+    },
+    {
+      "gameId": "memory-match",
+      "query": "memory card matching game",
+      "photoId": "picsum-memory-match",
+      "sourceUrl": "https://picsum.photos/seed/memory-match-cover/640/360",
+      "size": 18897,
+      "status": "ok"
+    },
+    {
+      "gameId": "perfect-timing",
+      "query": "archery target bullseye",
+      "photoId": "picsum-perfect-timing",
+      "sourceUrl": "https://picsum.photos/seed/perfect-timing-cover/640/360",
+      "size": 12888,
+      "status": "ok"
+    },
+    {
+      "gameId": "dodge-arena",
+      "query": "meteor asteroid space falling",
+      "photoId": "picsum-dodge-arena",
+      "sourceUrl": "https://picsum.photos/seed/dodge-arena-cover/640/360",
+      "size": 32191,
+      "status": "ok"
+    },
+    {
+      "gameId": "quick-math",
+      "query": "math calculation chalkboard numbers",
+      "photoId": "picsum-quick-math",
+      "sourceUrl": "https://picsum.photos/seed/quick-math-cover/640/360",
+      "size": 78778,
+      "status": "ok"
+    },
+    {
+      "gameId": "target-shoot",
+      "query": "target shooting archery",
+      "photoId": "picsum-target-shoot",
+      "sourceUrl": "https://picsum.photos/seed/target-shoot-cover/640/360",
+      "size": 33174,
+      "status": "ok"
+    },
+    {
+      "gameId": "color-memory",
+      "query": "colorful lights sequence memory",
+      "photoId": "picsum-color-memory",
+      "sourceUrl": "https://picsum.photos/seed/color-memory-cover/640/360",
+      "size": 27818,
+      "status": "ok"
+    },
+    {
+      "gameId": "balance",
+      "query": "balance scale weighing",
+      "photoId": "picsum-balance",
+      "sourceUrl": "https://picsum.photos/seed/balance-cover/640/360",
+      "size": 12431,
+      "status": "ok"
+    },
+    {
+      "gameId": "fastest-finger",
+      "query": "finger buzzer button press",
+      "photoId": "picsum-fastest-finger",
+      "sourceUrl": "https://picsum.photos/seed/fastest-finger-cover/640/360",
+      "size": 32191,
+      "status": "ok"
+    },
+    {
+      "gameId": "stop-the-bar",
+      "query": "gauge meter bar indicator",
+      "photoId": "picsum-stop-the-bar",
+      "sourceUrl": "https://picsum.photos/seed/stop-the-bar-cover/640/360",
+      "size": 52512,
+      "status": "ok"
+    },
+    {
+      "gameId": "number-rush",
+      "query": "numbers digits scattered",
+      "photoId": "picsum-number-rush",
+      "sourceUrl": "https://picsum.photos/seed/number-rush-cover/640/360",
+      "size": 10538,
+      "status": "ok"
+    },
+    {
+      "gameId": "safe-tile",
+      "query": "stone bridge tiles maze path",
+      "photoId": "picsum-safe-tile",
+      "sourceUrl": "https://picsum.photos/seed/safe-tile-cover/640/360",
+      "size": 54293,
+      "status": "ok"
+    },
+    {
+      "gameId": "balloon-pop",
+      "query": "colorful balloons sky party",
+      "photoId": "picsum-balloon-pop",
+      "sourceUrl": "https://picsum.photos/seed/balloon-pop-cover/640/360",
+      "size": 37805,
+      "status": "ok"
+    },
+    {
+      "gameId": "follow-the-arrow",
+      "query": "arrow direction signs",
+      "photoId": "picsum-follow-the-arrow",
+      "sourceUrl": "https://picsum.photos/seed/follow-the-arrow-cover/640/360",
+      "size": 18271,
+      "status": "ok"
+    },
+    {
+      "gameId": "dont-press-it",
+      "query": "giant red button dont press",
+      "photoId": "picsum-dont-press-it",
+      "sourceUrl": "https://picsum.photos/seed/dont-press-it-cover/640/360",
+      "size": 34986,
+      "status": "ok"
+    },
+    {
+      "gameId": "treasure-dig",
+      "query": "treasure chest gold digging",
+      "photoId": "picsum-treasure-dig",
+      "sourceUrl": "https://picsum.photos/seed/treasure-dig-cover/640/360",
+      "size": 16030,
+      "status": "ok"
+    },
+    {
+      "gameId": "race-to-100",
+      "query": "running sprint track race",
+      "photoId": "picsum-race-to-100",
+      "sourceUrl": "https://picsum.photos/seed/race-to-100-cover/640/360",
+      "size": 26295,
+      "status": "ok"
+    },
+    {
+      "gameId": "shape-snap",
+      "query": "geometric shapes pattern",
+      "photoId": "picsum-shape-snap",
+      "sourceUrl": "https://picsum.photos/seed/shape-snap-cover/640/360",
+      "size": 26247,
+      "status": "ok"
+    },
+    {
+      "gameId": "lane-switch",
+      "query": "racing car highway lane",
+      "photoId": "picsum-lane-switch",
+      "sourceUrl": "https://picsum.photos/seed/lane-switch-cover/640/360",
+      "size": 24386,
+      "status": "ok"
+    },
+    {
+      "gameId": "color-conveyor",
+      "query": "factory conveyor belt colorful",
+      "photoId": "picsum-color-conveyor",
+      "sourceUrl": "https://picsum.photos/seed/color-conveyor-cover/640/360",
+      "size": 27296,
+      "status": "ok"
+    },
+    {
+      "gameId": "tiny-bowling",
+      "query": "bowling pins ball alley",
+      "photoId": "picsum-tiny-bowling",
+      "sourceUrl": "https://picsum.photos/seed/tiny-bowling-cover/640/360",
+      "size": 41601,
+      "status": "ok"
+    },
+    {
+      "gameId": "memory-sequence-duel",
+      "query": "brain memory game lights",
+      "photoId": "picsum-memory-sequence-duel",
+      "sourceUrl": "https://picsum.photos/seed/memory-sequence-duel-cover/640/360",
+      "size": 32218,
+      "status": "ok"
+    },
+    {
+      "gameId": "reaction-grid",
+      "query": "grid lights reaction game",
+      "photoId": "picsum-reaction-grid",
+      "sourceUrl": "https://picsum.photos/seed/reaction-grid-cover/640/360",
+      "size": 18215,
+      "status": "ok"
+    },
+    {
+      "gameId": "tiny-golf",
+      "query": "mini golf course putter",
+      "photoId": "picsum-tiny-golf",
+      "sourceUrl": "https://picsum.photos/seed/tiny-golf-cover/640/360",
+      "size": 52416,
+      "status": "ok"
+    },
+    {
+      "gameId": "word-scramble",
+      "query": "scrambled letters word puzzle",
+      "photoId": "picsum-word-scramble",
+      "sourceUrl": "https://picsum.photos/seed/word-scramble-cover/640/360",
+      "size": 50876,
+      "status": "ok"
+    },
+    {
+      "gameId": "catch-the-fruit",
+      "query": "fruit basket harvest apples",
+      "photoId": "picsum-catch-the-fruit",
+      "sourceUrl": "https://picsum.photos/seed/catch-the-fruit-cover/640/360",
+      "size": 14751,
+      "status": "ok"
+    },
+    {
+      "gameId": "sum-sprint",
+      "query": "addition math numbers calculation",
+      "photoId": "picsum-sum-sprint",
+      "sourceUrl": "https://picsum.photos/seed/sum-sprint-cover/640/360",
+      "size": 53551,
+      "status": "ok"
+    },
+    {
+      "gameId": "perfect-landing",
+      "query": "spacecraft moon landing",
+      "photoId": "picsum-perfect-landing",
+      "sourceUrl": "https://picsum.photos/seed/perfect-landing-cover/640/360",
+      "size": 44734,
+      "status": "ok"
+    },
+    {
+      "gameId": "maze-escape",
+      "query": "maze labyrinth puzzle",
+      "photoId": "picsum-maze-escape",
+      "sourceUrl": "https://picsum.photos/seed/maze-escape-cover/640/360",
+      "size": 35695,
+      "status": "ok"
+    },
+    {
+      "gameId": "paper-plane-flight",
+      "query": "paper airplane flying sky",
+      "photoId": "picsum-paper-plane-flight",
+      "sourceUrl": "https://picsum.photos/seed/paper-plane-flight-cover/640/360",
+      "size": 21509,
+      "status": "ok"
+    },
+    {
+      "gameId": "shape-sort-factory",
+      "query": "shape sorting geometric blocks",
+      "photoId": "picsum-shape-sort-factory",
+      "sourceUrl": "https://picsum.photos/seed/shape-sort-factory-cover/640/360",
+      "size": 34139,
+      "status": "ok"
+    },
+    {
+      "gameId": "ice-slide",
+      "query": "ice slide frozen winter snow",
+      "photoId": "picsum-ice-slide",
+      "sourceUrl": "https://picsum.photos/seed/ice-slide-cover/640/360",
+      "size": 23346,
+      "status": "ok"
+    },
+    {
+      "gameId": "mini-curling",
+      "query": "curling stone ice sport",
+      "photoId": "picsum-mini-curling",
+      "sourceUrl": "https://picsum.photos/seed/mini-curling-cover/640/360",
+      "size": 62686,
+      "status": "ok"
+    },
+    {
+      "gameId": "word-chain",
+      "query": "word chain letters alphabet",
+      "photoId": "picsum-word-chain",
+      "sourceUrl": "https://picsum.photos/seed/word-chain-cover/640/360",
+      "size": 26367,
+      "status": "ok"
+    },
+    {
+      "gameId": "safecracker",
+      "query": "safe vault combination lock",
+      "photoId": "picsum-safecracker",
+      "sourceUrl": "https://picsum.photos/seed/safecracker-cover/640/360",
+      "size": 15034,
+      "status": "ok"
+    },
+    {
+      "gameId": "fishing-frenzy",
+      "query": "fishing rod catch fish lake",
+      "photoId": "picsum-fishing-frenzy",
+      "sourceUrl": "https://picsum.photos/seed/fishing-frenzy-cover/640/360",
+      "size": 27087,
+      "status": "ok"
+    },
+    {
+      "gameId": "light-trail-duel",
+      "query": "neon light trail tron motorcycle",
+      "photoId": "picsum-light-trail-duel",
+      "sourceUrl": "https://picsum.photos/seed/light-trail-duel-cover/640/360",
+      "size": 40774,
+      "status": "ok"
+    },
+    {
+      "gameId": "find-the-change",
+      "query": "spot the difference puzzle",
+      "photoId": "picsum-find-the-change",
+      "sourceUrl": "https://picsum.photos/seed/find-the-change-cover/640/360",
+      "size": 36764,
+      "status": "ok"
+    },
+    {
+      "gameId": "territory-battle",
+      "query": "territory map color tiles",
+      "photoId": "picsum-territory-battle",
+      "sourceUrl": "https://picsum.photos/seed/territory-battle-cover/640/360",
+      "size": 34062,
+      "status": "ok"
+    },
+    {
+      "gameId": "balloon-pump",
+      "query": "balloon inflating pump air",
+      "photoId": "picsum-balloon-pump",
+      "sourceUrl": "https://picsum.photos/seed/balloon-pump-cover/640/360",
+      "size": 31526,
+      "status": "ok"
+    },
+    {
+      "gameId": "number-puzzle",
+      "query": "number puzzle sudoku math",
+      "photoId": "picsum-number-puzzle",
+      "sourceUrl": "https://picsum.photos/seed/number-puzzle-cover/640/360",
+      "size": 32915,
+      "status": "ok"
+    },
+    {
+      "gameId": "find-the-odd-one",
+      "query": "find odd one out puzzle eyes",
+      "photoId": "picsum-find-the-odd-one",
+      "sourceUrl": "https://picsum.photos/seed/find-the-odd-one-cover/640/360",
+      "size": 21527,
+      "status": "ok"
+    },
+    {
+      "gameId": "connect-the-dots",
+      "query": "connect dots drawing line puzzle",
+      "photoId": "picsum-connect-the-dots",
+      "sourceUrl": "https://picsum.photos/seed/connect-the-dots-cover/640/360",
+      "size": 33148,
+      "status": "ok"
+    },
+    {
+      "gameId": "color-logic",
+      "query": "color logic stroop test",
+      "photoId": "picsum-color-logic",
+      "sourceUrl": "https://picsum.photos/seed/color-logic-cover/640/360",
+      "size": 26416,
+      "status": "ok"
+    },
+    {
+      "gameId": "dice-battle",
+      "query": "dice rolling game casino",
+      "photoId": "picsum-dice-battle",
+      "sourceUrl": "https://picsum.photos/seed/dice-battle-cover/640/360",
+      "size": 69721,
+      "status": "ok"
+    },
+    {
+      "gameId": "higher-or-lower",
+      "query": "playing cards poker higher lower",
+      "photoId": "picsum-higher-or-lower",
+      "sourceUrl": "https://picsum.photos/seed/higher-or-lower-cover/640/360",
+      "size": 53488,
+      "status": "ok"
+    },
+    {
+      "gameId": "copy-the-shape",
+      "query": "drawing circle star hand sketch",
+      "photoId": "picsum-copy-the-shape",
+      "sourceUrl": "https://picsum.photos/seed/copy-the-shape-cover/640/360",
+      "size": 26247,
+      "status": "ok"
+    }
+  ],
+  "failures": [
+    {
+      "id": "whack-it",
+      "error": "[whack-it] failed after 3 attempts: too small 9254 bytes url=https://picsum.photos/seed/whack-it-cover/640/360"
+    },
+    {
+      "id": "bridge-builder",
+      "error": "[bridge-builder] failed after 3 attempts: too small 10109 bytes url=https://picsum.photos/seed/bridge-builder-cover/640/360"
+    }
+  ]
+}

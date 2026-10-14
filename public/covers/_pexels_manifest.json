@@ -1,0 +1,393 @@
+{
+  "generatedAt": "2026-10-14T10:23:52.057Z",
+  "map": {
+    "quick-tap": "27742642",
+    "rapid-tap": "28993080",
+    "tug-of-war": "20417700",
+    "pattern-memory": "9834375",
+    "coin-rush": "19704271",
+    "color-clash": "2539159",
+    "bomb-pass": "35982176",
+    "memory-match": "7594824",
+    "perfect-timing": "6540714",
+    "dodge-arena": "34180947",
+    "quick-math": "39190846",
+    "target-shoot": "6669448",
+    "color-memory": "16485668",
+    "balance": "5668882",
+    "fastest-finger": "31470430",
+    "whack-it": "16205460",
+    "stop-the-bar": "39264485",
+    "number-rush": "27639885",
+    "safe-tile": "9775410",
+    "balloon-pop": "28921536",
+    "follow-the-arrow": "28079332",
+    "dont-press-it": "5052053",
+    "treasure-dig": "12860984",
+    "race-to-100": "37719399",
+    "shape-snap": "33386712",
+    "lane-switch": "29360730",
+    "color-conveyor": "13974251",
+    "tiny-bowling": "12789438",
+    "memory-sequence-duel": "17483867",
+    "reaction-grid": "13859617",
+    "tiny-golf": "6370064",
+    "word-scramble": "19825345",
+    "catch-the-fruit": "38990501",
+    "sum-sprint": "209224",
+    "perfect-landing": "586112",
+    "maze-escape": "20797717",
+    "paper-plane-flight": "7956728",
+    "shape-sort-factory": "8762345",
+    "ice-slide": "7099647",
+    "mini-curling": "7544432",
+    "word-chain": "1337375",
+    "safecracker": "37991788",
+    "fishing-frenzy": "14339527",
+    "bridge-builder": "9160242",
+    "light-trail-duel": "26384108",
+    "find-the-change": "5484739",
+    "territory-battle": "8159115",
+    "balloon-pump": "38220564",
+    "number-puzzle": "8899562",
+    "find-the-odd-one": "4494496",
+    "connect-the-dots": "12453596",
+    "color-logic": "11105660",
+    "dice-battle": "269630",
+    "higher-or-lower": "34148826",
+    "copy-the-shape": "20535621"
+  },
+  "results": [
+    {
+      "gameId": "quick-tap",
+      "via": "pexels:27742642",
+      "size": 17229,
+      "status": "ok"
+    },
+    {
+      "gameId": "rapid-tap",
+      "via": "pexels:28993080",
+      "size": 28822,
+      "status": "ok"
+    },
+    {
+      "gameId": "tug-of-war",
+      "via": "pexels:20417700",
+      "size": 67003,
+      "status": "ok"
+    },
+    {
+      "gameId": "pattern-memory",
+      "via": "pexels:9834375",
+      "size": 85186,
+      "status": "ok"
+    },
+    {
+      "gameId": "coin-rush",
+      "via": "pexels:19704271",
+      "size": 79247,
+      "status": "ok"
+    },
+    {
+      "gameId": "color-clash",
+      "via": "pexels:2539159",
+      "size": 26687,
+      "status": "ok"
+    },
+    {
+      "gameId": "bomb-pass",
+      "via": "pexels:35982176",
+      "size": 35569,
+      "status": "ok"
+    },
+    {
+      "gameId": "memory-match",
+      "via": "pexels:7594824",
+      "size": 28441,
+      "status": "ok"
+    },
+    {
+      "gameId": "perfect-timing",
+      "via": "pexels:6540714",
+      "size": 37776,
+      "status": "ok"
+    },
+    {
+      "gameId": "dodge-arena",
+      "via": "pexels:34180947",
+      "size": 45849,
+      "status": "ok"
+    },
+    {
+      "gameId": "quick-math",
+      "via": "pexels:39190846",
+      "size": 24576,
+      "status": "ok"
+    },
+    {
+      "gameId": "target-shoot",
+      "via": "pexels:6669448",
+      "size": 28496,
+      "status": "ok"
+    },
+    {
+      "gameId": "color-memory",
+      "via": "pexels:16485668",
+      "size": 22705,
+      "status": "ok"
+    },
+    {
+      "gameId": "balance",
+      "via": "pexels:5668882",
+      "size": 43456,
+      "status": "ok"
+    },
+    {
+      "gameId": "fastest-finger",
+      "via": "pexels:31470430",
+      "size": 19336,
+      "status": "ok"
+    },
+    {
+      "gameId": "whack-it",
+      "via": "pexels:16205460",
+      "size": 18577,
+      "status": "ok"
+    },
+    {
+      "gameId": "stop-the-bar",
+      "via": "pexels:39264485",
+      "size": 32339,
+      "status": "ok"
+    },
+    {
+      "gameId": "number-rush",
+      "via": "pexels:27639885",
+      "size": 39213,
+      "status": "ok"
+    },
+    {
+      "gameId": "safe-tile",
+      "via": "pexels:9775410",
+      "size": 43645,
+      "status": "ok"
+    },
+    {
+      "gameId": "balloon-pop",
+      "via": "pexels:28921536",
+      "size": 18401,
+      "status": "ok"
+    },
+    {
+      "gameId": "follow-the-arrow",
+      "via": "pexels:28079332",
+      "size": 19690,
+      "status": "ok"
+    },
+    {
+      "gameId": "dont-press-it",
+      "via": "pexels:5052053",
+      "size": 23041,
+      "status": "ok"
+    },
+    {
+      "gameId": "treasure-dig",
+      "via": "pexels:12860984",
+      "size": 31140,
+      "status": "ok"
+    },
+    {
+      "gameId": "race-to-100",
+      "via": "pexels:37719399",
+      "size": 102181,
+      "status": "ok"
+    },
+    {
+      "gameId": "shape-snap",
+      "via": "pexels:33386712",
+      "size": 23414,
+      "status": "ok"
+    },
+    {
+      "gameId": "lane-switch",
+      "via": "pexels:29360730",
+      "size": 29939,
+      "status": "ok"
+    },
+    {
+      "gameId": "color-conveyor",
+      "via": "pexels:13974251",
+      "size": 56710,
+      "status": "ok"
+    },
+    {
+      "gameId": "tiny-bowling",
+      "via": "pexels:12789438",
+      "size": 19921,
+      "status": "ok"
+    },
+    {
+      "gameId": "memory-sequence-duel",
+      "via": "pexels:17483867",
+      "size": 19650,
+      "status": "ok"
+    },
+    {
+      "gameId": "reaction-grid",
+      "via": "pexels:13859617",
+      "size": 34064,
+      "status": "ok"
+    },
+    {
+      "gameId": "tiny-golf",
+      "via": "pexels:6370064",
+      "size": 57279,
+      "status": "ok"
+    },
+    {
+      "gameId": "word-scramble",
+      "via": "pexels:19825345",
+      "size": 69559,
+      "status": "ok"
+    },
+    {
+      "gameId": "catch-the-fruit",
+      "via": "pexels:38990501",
+      "size": 41314,
+      "status": "ok"
+    },
+    {
+      "gameId": "sum-sprint",
+      "via": "pexels:209224",
+      "size": 37834,
+      "status": "ok"
+    },
+    {
+      "gameId": "perfect-landing",
+      "via": "pexels:586112",
+      "size": 25174,
+      "status": "ok"
+    },
+    {
+      "gameId": "maze-escape",
+      "via": "pexels:20797717",
+      "size": 65259,
+      "status": "ok"
+    },
+    {
+      "gameId": "paper-plane-flight",
+      "via": "pexels:7956728",
+      "size": 20631,
+      "status": "ok"
+    },
+    {
+      "gameId": "shape-sort-factory",
+      "via": "pexels:8762345",
+      "size": 21988,
+      "status": "ok"
+    },
+    {
+      "gameId": "ice-slide",
+      "via": "pexels:7099647",
+      "size": 43186,
+      "status": "ok"
+    },
+    {
+      "gameId": "mini-curling",
+      "via": "pexels:7544432",
+      "size": 18942,
+      "status": "ok"
+    },
+    {
+      "gameId": "word-chain",
+      "via": "pexels:1337375",
+      "size": 29104,
+      "status": "ok"
+    },
+    {
+      "gameId": "safecracker",
+      "via": "pexels:37991788",
+      "size": 28830,
+      "status": "ok"
+    },
+    {
+      "gameId": "fishing-frenzy",
+      "via": "pexels:14339527",
+      "size": 28482,
+      "status": "ok"
+    },
+    {
+      "gameId": "bridge-builder",
+      "via": "pexels:9160242",
+      "size": 75699,
+      "status": "ok"
+    },
+    {
+      "gameId": "light-trail-duel",
+      "via": "pexels:26384108",
+      "size": 17990,
+      "status": "ok"
+    },
+    {
+      "gameId": "find-the-change",
+      "via": "pexels:5484739",
+      "size": 58930,
+      "status": "ok"
+    },
+    {
+      "gameId": "territory-battle",
+      "via": "pexels:8159115",
+      "size": 28265,
+      "status": "ok"
+    },
+    {
+      "gameId": "balloon-pump",
+      "via": "pexels:38220564",
+      "size": 39271,
+      "status": "ok"
+    },
+    {
+      "gameId": "number-puzzle",
+      "via": "pexels:8899562",
+      "size": 31207,
+      "status": "ok"
+    },
+    {
+      "gameId": "find-the-odd-one",
+      "via": "pexels:4494496",
+      "size": 16044,
+      "status": "ok"
+    },
+    {
+      "gameId": "connect-the-dots",
+      "via": "pexels:12453596",
+      "size": 23314,
+      "status": "ok"
+    },
+    {
+      "gameId": "color-logic",
+      "via": "pexels:11105660",
+      "size": 56736,
+      "status": "ok"
+    },
+    {
+      "gameId": "dice-battle",
+      "via": "pexels:269630",
+      "size": 39208,
+      "status": "ok"
+    },
+    {
+      "gameId": "higher-or-lower",
+      "via": "pexels:34148826",
+      "size": 32369,
+      "status": "ok"
+    },
+    {
+      "gameId": "copy-the-shape",
+      "via": "pexels:20535621",
+      "size": 26923,
+      "status": "ok"
+    }
+  ],
+  "failures": []
+}

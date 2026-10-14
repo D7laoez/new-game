@@ -265,4 +265,80 @@ export class AudioManager implements IAudioManager {
     this.playTone(300, 0.15, 'square');
     setTimeout(() => this.playTone(250, 0.15, 'square'), 180);
   }
+
+  // ========== Background Music (Web Audio loop) ==========
+  private musicEnabled = true;
+  private musicVolume = 0.22;
+  private musicNodes: { osc1?: OscillatorNode; osc2?: OscillatorNode; gain?: GainNode } | null = null;
+  private musicTimer: number | null = null;
+
+  isMusicEnabled(): boolean { return this.musicEnabled; }
+  setMusicEnabled(enabled: boolean): void {
+    this.musicEnabled = enabled;
+    if (!enabled) this.stopMusic();
+    else this.playMusic();
+  }
+  getMusicVolume(): number { return this.musicVolume; }
+  setMusicVolume(vol: number): void {
+    this.musicVolume = Math.max(0, Math.min(1, vol));
+    if (this.musicNodes?.gain) {
+      try { this.musicNodes.gain.gain.setValueAtTime(this.musicVolume * 0.35, this.musicNodes.gain.context.currentTime); } catch {}
+    }
+  }
+  playMusic(): void {
+    if (!this.musicEnabled || !this.enabled) return;
+    if (this.musicNodes) return;
+    const ctx = this.initCtx();
+    if (!ctx) return;
+    try {
+      const gain = ctx.createGain();
+      gain.gain.setValueAtTime(0, ctx.currentTime);
+      gain.gain.linearRampToValueAtTime(this.musicVolume * 0.32, ctx.currentTime + 1.2);
+      gain.connect(ctx.destination);
+      const osc1 = ctx.createOscillator();
+      const osc2 = ctx.createOscillator();
+      osc1.type = 'triangle'; osc2.type = 'sine';
+      osc1.frequency.setValueAtTime(110, ctx.currentTime);
+      osc2.frequency.setValueAtTime(220, ctx.currentTime);
+      const lfo = ctx.createOscillator();
+      const lfoGain = ctx.createGain();
+      lfo.frequency.setValueAtTime(0.35, ctx.currentTime);
+      lfoGain.gain.setValueAtTime(6, ctx.currentTime);
+      lfo.connect(lfoGain); lfoGain.connect(osc1.frequency);
+      osc1.connect(gain); osc2.connect(gain);
+      osc1.start(); osc2.start(); lfo.start();
+      this.musicNodes = { osc1, osc2, gain };
+      // gentle chord progression via periodic freq shifts
+      const chords: [number, number][] = [[110,165],[98,147],[130,196],[110,165]];
+      let idx = 0;
+      this.musicTimer = window.setInterval(() => {
+        if (!this.musicNodes || !this.musicEnabled || !this.enabled) return;
+        const c = chords[idx % chords.length]; idx++;
+        try {
+          const now = ctx.currentTime;
+          osc1.frequency.linearRampToValueAtTime(c[0], now + 0.6);
+          osc2.frequency.linearRampToValueAtTime(c[1], now + 0.6);
+        } catch {}
+      }, 3800);
+    } catch {}
+  }
+  stopMusic(): void {
+    if (this.musicTimer !== null) { clearInterval(this.musicTimer); this.musicTimer = null; }
+    if (!this.musicNodes) return;
+    try {
+      const g = this.musicNodes.gain!;
+      const now = g.context.currentTime;
+      g.gain.cancelScheduledValues(now);
+      g.gain.linearRampToValueAtTime(0, now + 0.6);
+      setTimeout(() => {
+        try { this.musicNodes?.osc1?.stop(); this.musicNodes?.osc2?.stop(); this.musicNodes?.osc1?.disconnect(); this.musicNodes?.osc2?.disconnect(); g.disconnect(); } catch {}
+        this.musicNodes = null;
+      }, 700);
+    } catch { this.musicNodes = null; }
+    if (!this.musicEnabled) this.musicNodes = null;
+    else {
+      // fade-out path already cleared
+      setTimeout(()=>{ if(!this.musicEnabled) this.musicNodes=null; }, 800);
+    }
+  }
 }

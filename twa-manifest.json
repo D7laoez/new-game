@@ -1,0 +1,58 @@
+{
+  "packageId": "com.partygames.collection",
+  "host": "example.com",
+  "name": "Party Game Collection",
+  "launcherName": "PartyGames",
+  "display": "standalone",
+  "themeColor": "#0a0c16",
+  "navigationColor": "#0a0c16",
+  "backgroundColor": "#0a0c16",
+  "enableNotifications": true,
+  "startUrl": "/",
+  "iconUrl": "https://example.com/icon-512.png",
+  "maskableIconUrl": "https://example.com/icon-512-maskable.png",
+  "monochromeIconUrl": null,
+  "splashScreenFadeOutDuration": 300,
+  "signingKey": {
+    "path": "./android.keystore",
+    "alias": "android"
+  },
+  "appVersion": "1.0.0",
+  "appVersionCode": 1,
+  "shortcuts": [
+    {
+      "name": "Quick Party",
+      "shortName": "Quick Party",
+      "url": "/?quick=1",
+      "iconUrl": "https://example.com/icon-192.png"
+    },
+    {
+      "name": "Library",
+      "shortName": "Library",
+      "url": "/?library=1",
+      "iconUrl": "https://example.com/icon-192.png"
+    }
+  ],
+  "generatorApp": "bubblewrap",
+  "webManifestUrl": "https://example.com/manifest.webmanifest",
+  "fallbackType": "customtabs",
+  "features": {
+    "locationDelegation": {
+      "enabled": true
+    },
+    "playBilling": {
+      "enabled": false
+    }
+  },
+  "alphaDependencies": {
+    "enabled": false
+  },
+  "enableSiteSettingsShortcut": true,
+  "isChromeOSOnly": false,
+  "isMetaQuest": false,
+  "fullScopeUrl": "https://example.com/",
+  "minSdkVersion": 21,
+  "orientation": "any",
+  "fingerprints": [],
+  "additionalTrustedOrigins": []
+}
