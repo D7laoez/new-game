@@ -26,6 +26,7 @@ export class PartyApp {
   private menuView!: HTMLElement;
   private gameArenaView!: HTMLElement;
   private introOverlay!: HTMLElement;
+  private introTimer: number | null = null;
 
   private currentLang: Language = 'en';
 
@@ -345,7 +346,15 @@ export class PartyApp {
     }
   }
 
+  private clearIntroTimer(): void {
+    if (this.introTimer !== null) {
+      clearInterval(this.introTimer);
+      this.introTimer = null;
+    }
+  }
+
   private showIntroOverlay(game: GameMetadata): void {
+    this.clearIntroTimer();
     this.introOverlay.classList.remove('hidden');
     const isAr = this.currentLang === 'ar';
 
