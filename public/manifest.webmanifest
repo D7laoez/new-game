@@ -1,0 +1,18 @@
+{
+  "name": "Party Game Collection - 1-4 Players",
+  "short_name": "PartyGames",
+  "description": "50+ fast, fun local multiplayer mini-games for 1, 2, 3 or 4 players on the same screen and device.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0a0c16",
+  "theme_color": "#6366f1",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

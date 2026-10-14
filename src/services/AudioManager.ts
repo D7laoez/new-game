@@ -7,6 +7,22 @@ export class AudioManager implements IAudioManager {
 
   constructor(enabled = true) {
     this.enabled = enabled;
+    this.setupGestureUnlock();
+  }
+
+  private setupGestureUnlock(): void {
+    if (typeof window !== 'undefined') {
+      const unlock = () => {
+        this.initCtx();
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume().catch(() => {});
+        }
+        window.removeEventListener('pointerdown', unlock);
+        window.removeEventListener('keydown', unlock);
+      };
+      window.addEventListener('pointerdown', unlock, { passive: true });
+      window.addEventListener('keydown', unlock, { passive: true });
+    }
   }
 
   private initCtx(): AudioContext | null {
@@ -158,5 +174,68 @@ export class AudioManager implements IAudioManager {
     fanfare.forEach(item => {
       setTimeout(() => this.playTone(item.f, item.d, 'triangle'), item.t);
     });
+  }
+
+  playExplosion(): void {
+    if (!this.enabled) return;
+    const ctx = this.initCtx();
+    if (!ctx) return;
+    try {
+      const bufferSize = ctx.sampleRate * 0.4;
+      const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) {
+        data[i] = Math.random() * 2 - 1;
+      }
+
+      const noise = ctx.createBufferSource();
+      noise.buffer = buffer;
+
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(800, ctx.currentTime);
+      filter.frequency.exponentialRampToValueAtTime(30, ctx.currentTime + 0.35);
+
+      const gain = ctx.createGain();
+      gain.gain.setValueAtTime(this.volume * 0.5, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.35);
+
+      noise.connect(filter);
+      filter.connect(gain);
+      gain.connect(ctx.destination);
+
+      noise.start();
+      noise.stop(ctx.currentTime + 0.35);
+    } catch {}
+  }
+
+  playWhoosh(): void {
+    if (!this.enabled) return;
+    const ctx = this.initCtx();
+    if (!ctx) return;
+    try {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(150, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(600, ctx.currentTime + 0.12);
+      osc.frequency.exponentialRampToValueAtTime(80, ctx.currentTime + 0.25);
+
+      gain.gain.setValueAtTime(0.01, ctx.currentTime);
+      gain.gain.linearRampToValueAtTime(this.volume * 0.3, ctx.currentTime + 0.1);
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.25);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start();
+      osc.stop(ctx.currentTime + 0.25);
+    } catch {}
+  }
+
+  playBuzzer(): void {
+    if (!this.enabled) return;
+    this.playTone(130, 0.12, 'sawtooth');
+    setTimeout(() => this.playTone(130, 0.12, 'sawtooth'), 150);
   }
 }

@@ -3602,3 +3602,70 @@ body {
 
 .ss-feedback.match { color: #2ed573; }
 .ss-feedback.false-snap { color: #ff4757; }
+
+/* ==================================================
+   RTL & ARABIC TYPOGRAPHY ENHANCEMENTS
+================================================== */
+[dir="rtl"] {
+  font-family: 'Segoe UI', system-ui, -apple-system, Tahoma, 'Noto Sans Arabic', Arial, sans-serif;
+  letter-spacing: normal;
+}
+
+[dir="rtl"] .app-brand {
+  text-align: right;
+}
+
+[dir="rtl"] .brand-title {
+  letter-spacing: 0;
+}
+
+[dir="rtl"] .top-bar-actions {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .menu-tile {
+  text-align: right;
+}
+
+[dir="rtl"] .modal-header {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .modal-close-btn {
+  margin-left: 0;
+  margin-right: auto;
+}
+
+[dir="rtl"] .modal-actions {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .settings-row {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .stat-card-row {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .cup-card {
+  text-align: right;
+}
+
+[dir="rtl"] .achievement-row {
+  flex-direction: row-reverse;
+  text-align: right;
+}
+
+.btn-lang {
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 6px 12px;
+  background: rgba(99, 102, 241, 0.15);
+  border: 1px solid rgba(165, 180, 252, 0.3);
+  color: #a5b4fc;
+}
+
+.btn-lang:hover {
+  background: rgba(99, 102, 241, 0.3);
+}

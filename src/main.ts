@@ -6,4 +6,11 @@ document.addEventListener('DOMContentLoaded', () => {
   if (root) {
     new PartyApp(root);
   }
+
+  // Register PWA Service Worker
+  if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
+    navigator.serviceWorker.register('/sw.js').catch(err => {
+      console.log('SW registration note:', err);
+    });
+  }
 });

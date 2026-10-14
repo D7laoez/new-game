@@ -140,6 +140,9 @@ export interface IAudioManager {
   playWinner(): void;
   playTugPull(): void;
   playPop(): void;
+  playExplosion(): void;
+  playWhoosh(): void;
+  playBuzzer(): void;
   playTone(freq: number, duration?: number, type?: OscillatorType): void;
   toggleMute(enabled: boolean): void;
 }

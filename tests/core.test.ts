@@ -881,4 +881,25 @@ describe('Party Game Collection - Phase 3 Comprehensive Test Suite', () => {
       game.destroy();
     });
   });
+
+  // ==========================================
+  // 12. I18N AND AUDIO EXTENSION TESTS
+  // ==========================================
+  describe('I18n & Procedural Audio Engine', () => {
+    it('57. provides valid bilingual dictionary for English and Arabic', async () => {
+      const { i18nDict } = await import('../src/services/I18nService.ts');
+      expect(i18nDict.en.partyGamesTitle).toBe('PARTY GAMES');
+      expect(i18nDict.ar.partyGamesTitle).toBe('ألعاب الحفلة');
+      expect(i18nDict.en.playersCount(3)).toBe('👥 3 Players');
+      expect(i18nDict.ar.playersCount(3)).toBe('👥 3 لاعبين');
+    });
+
+    it('58. procedural audio effects (explosion, whoosh, buzzer) execute safely without throwing', () => {
+      const audio = new AudioManager(true);
+      expect(() => audio.playExplosion()).not.toThrow();
+      expect(() => audio.playWhoosh()).not.toThrow();
+      expect(() => audio.playBuzzer()).not.toThrow();
+    });
+  });
 });
+

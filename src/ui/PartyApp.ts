@@ -7,6 +7,8 @@ import { AchievementManager } from '../services/AchievementManager.ts';
 import { MiniGameManager } from '../core/MiniGameManager.ts';
 import { RoundManager, SessionState } from '../core/RoundManager.ts';
 import { ModalsManager } from './Modals.ts';
+import { StorageService } from '../services/StorageService.ts';
+import { Language, i18nDict, Translations } from '../services/I18nService.ts';
 import { PartyConfig, GameMetadata, RoundResult, PlayerId } from '../types/index.ts';
 
 export class PartyApp {
@@ -25,8 +27,13 @@ export class PartyApp {
   private gameArenaView!: HTMLElement;
   private introOverlay!: HTMLElement;
 
+  private currentLang: Language = 'en';
+
   constructor(root: HTMLElement) {
     this.appRoot = root;
+    this.currentLang = StorageService.getItem<Language>('app_lang', 'en');
+    this.applyLanguage(this.currentLang, false);
+
     this.playerManager = new PlayerManager();
     this.scoreManager = new ScoreManager(this.playerManager);
     this.audioManager = new AudioManager(true);
@@ -69,34 +76,62 @@ export class PartyApp {
     this.renderBaseLayout();
   }
 
+  public get t(): Translations {
+    return i18nDict[this.currentLang];
+  }
+
+  public applyLanguage(lang: Language, reRender = true): void {
+    this.currentLang = lang;
+    StorageService.setItem('app_lang', lang);
+    if (typeof document !== 'undefined') {
+      document.documentElement.lang = lang;
+      document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+    }
+    if (reRender && this.menuView) {
+      this.renderBaseLayout();
+    }
+  }
+
+  public toggleLanguage(): void {
+    const nextLang: Language = this.currentLang === 'en' ? 'ar' : 'en';
+    this.applyLanguage(nextLang, true);
+    this.audioManager.playTap();
+  }
+
   private renderBaseLayout(): void {
+    const t = this.t;
+    const isAr = this.currentLang === 'ar';
+
     this.appRoot.innerHTML = `
       <div class="app-container">
         <!-- MAIN MENU -->
         <div class="view-menu" id="view-menu">
           <header class="app-top-bar">
             <div class="app-brand">
-              <span class="brand-badge">50+ MINI-GAMES</span>
-              <h1 class="brand-title">PARTY GAMES</h1>
+              <span class="brand-badge">${t.miniGamesBadge}</span>
+              <h1 class="brand-title">${t.partyGamesTitle}</h1>
             </div>
             <div class="top-bar-actions">
+              <button class="icon-btn btn-lang" id="btn-lang-toggle" title="Switch Language">
+                <span>${isAr ? '🇬🇧 English' : '🇸🇦 العربية'}</span>
+              </button>
               <button class="icon-btn" id="btn-player-pill" title="Configure Players">
                 <span id="player-count-label">👥 2 Players</span>
               </button>
-              <button class="icon-btn" id="btn-stats" title="Statistics">📊</button>
-              <button class="icon-btn" id="btn-achievements" title="Achievements">🏅</button>
+              <button class="icon-btn" id="btn-stats" title="${t.statistics}">📊</button>
+              <button class="icon-btn" id="btn-achievements" title="${t.achievements}">🏅</button>
               <button class="icon-btn" id="btn-audio-toggle" title="Toggle Sound">🔊</button>
-              <button class="icon-btn" id="btn-settings" title="Settings">⚙️</button>
+              <button class="icon-btn" id="btn-settings" title="${t.settings}">⚙️</button>
             </div>
           </header>
 
           <main class="menu-content">
             <!-- HERO QUICK PLAY -->
             <div class="hero-card" id="btn-quick-play">
-              <div class="hero-badge">⚡ INSTANT FUN</div>
-              <h2>QUICK PARTY</h2>
-              <p>3 Fast Random Rounds for you and your friends</p>
-              <button class="btn btn-primary btn-glow">PLAY NOW 🎮</button>
+              <div class="hero-badge">${t.instantFun}</div>
+              <h2>${t.quickParty}</h2>
+              <p>${t.quickPartyDesc}</p>
+              <button class="btn btn-primary btn-glow">${t.playNow}</button>
             </div>
 
             <!-- MODE TILES -->
@@ -104,32 +139,32 @@ export class PartyApp {
               <div class="menu-tile tile-tournament" id="btn-mode-tournament">
                 <div class="tile-icon">🏆</div>
                 <div class="tile-body">
-                  <h3>Tournament</h3>
-                  <p>Bronze, Silver, Gold & Ultimate Championship Cups</p>
+                  <h3>${t.tournament}</h3>
+                  <p>${t.tournamentDesc}</p>
                 </div>
               </div>
 
               <div class="menu-tile tile-custom" id="btn-mode-custom">
                 <div class="tile-icon">🎯</div>
                 <div class="tile-body">
-                  <h3>Custom Party</h3>
-                  <p>Choose rounds & select game categories</p>
+                  <h3>${t.customParty}</h3>
+                  <p>${t.customPartyDesc}</p>
                 </div>
               </div>
 
               <div class="menu-tile tile-library" id="btn-mode-library">
                 <div class="tile-icon">📚</div>
                 <div class="tile-body">
-                  <h3>Game Library</h3>
-                  <p>Explore 55 games & play any directly</p>
+                  <h3>${t.gameLibrary}</h3>
+                  <p>${t.gameLibraryDesc}</p>
                 </div>
               </div>
 
               <div class="menu-tile tile-players" id="btn-mode-players">
                 <div class="tile-icon">👥</div>
                 <div class="tile-body">
-                  <h3>Players & Avatars</h3>
-                  <p>Customize names, colors & pick 1-4 players</p>
+                  <h3>${t.playersAndAvatars}</h3>
+                  <p>${t.playersDesc}</p>
                 </div>
               </div>
             </div>
@@ -164,6 +199,11 @@ export class PartyApp {
   }
 
   private bindMenuEvents(): void {
+    // Language Toggle
+    this.appRoot.querySelector('#btn-lang-toggle')?.addEventListener('click', () => {
+      this.toggleLanguage();
+    });
+
     // Quick Play
     this.appRoot.querySelector('#btn-quick-play')?.addEventListener('click', () => {
       this.audioManager.playStart();
@@ -244,7 +284,7 @@ export class PartyApp {
 
     // Abort game
     this.appRoot.querySelector('#btn-abort-game')?.addEventListener('click', () => {
-      if (confirm('Quit back to main menu?')) {
+      if (confirm(this.t.quitConfirm)) {
         this.roundManager.endSession();
         this.showMenu();
       }
@@ -257,7 +297,7 @@ export class PartyApp {
     const players = this.playerManager.getActivePlayers();
 
     if (label) {
-      label.textContent = `👥 ${players.length} ${players.length === 1 ? 'Solo' : 'Players'}`;
+      label.textContent = this.t.playersCount(players.length);
     }
 
     if (strip) {
@@ -291,7 +331,10 @@ export class PartyApp {
   private handleSessionState(state: SessionState, data?: unknown): void {
     const roundTag = this.appRoot.querySelector('#arena-round-tag');
     if (roundTag) {
-      roundTag.textContent = `Round ${this.roundManager.getCurrentRound()} / ${this.roundManager.getTotalRounds()}`;
+      roundTag.textContent = this.t.roundIndicator(
+        this.roundManager.getCurrentRound(),
+        this.roundManager.getTotalRounds()
+      );
     }
 
     if (state === 'INTRO') {
@@ -304,16 +347,18 @@ export class PartyApp {
 
   private showIntroOverlay(game: GameMetadata): void {
     this.introOverlay.classList.remove('hidden');
+    const isAr = this.currentLang === 'ar';
+
     this.introOverlay.innerHTML = `
       <div class="intro-card">
         <div class="intro-category-badge">${game.category}</div>
         <div class="intro-icon">${game.icon}</div>
-        <h2 class="intro-title">${game.title}</h2>
-        <h3 class="intro-title-ar">${game.titleAr}</h3>
+        <h2 class="intro-title">${isAr && game.titleAr ? game.titleAr : game.title}</h2>
+        <h3 class="intro-title-ar">${isAr ? game.title : game.titleAr}</h3>
         <p class="intro-desc">${game.instructions}</p>
 
         <div class="countdown-circle" id="countdown-circle">
-          <span id="countdown-num">Ready</span>
+          <span id="countdown-num">${this.t.getReady}</span>
         </div>
       </div>
     `;
