@@ -272,6 +272,7 @@ export class CoinRushGame extends BaseMiniGame {
 
   private render(): void {
     const ctx = this.ctx;
+    if (!ctx) return;
     const w = this.canvas.width;
     const h = this.canvas.height;
 

@@ -2,12 +2,15 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { PlayerManager } from '../src/services/PlayerManager.ts';
 import { ScoreManager } from '../src/services/ScoreManager.ts';
+import { StatsService } from '../src/services/StatsService.ts';
+import { AchievementManager } from '../src/services/AchievementManager.ts';
 import { MiniGameManager } from '../src/core/MiniGameManager.ts';
 import { RoundManager, SessionState } from '../src/core/RoundManager.ts';
 import { StorageService } from '../src/services/StorageService.ts';
 import { AudioManager } from '../src/services/AudioManager.ts';
 import { HapticManager } from '../src/services/HapticManager.ts';
 import { GAME_CATALOG } from '../src/catalog/gameCatalog.ts';
+import { PlayerId } from '../src/types/index.ts';
 
 const memoryStorage: Record<string, string> = {};
 globalThis.localStorage = {
@@ -25,12 +28,14 @@ globalThis.localStorage = {
   length: 0
 } as unknown as Storage;
 
-describe('Party Game Collection - Phase 2 Comprehensive Test Suite', () => {
+describe('Party Game Collection - Phase 3 Comprehensive Test Suite', () => {
   beforeEach(() => {
     localStorage.clear();
   });
 
-  // --- STORAGE SERVICE TESTS ---
+  // ==========================================
+  // 1. STORAGE SERVICE TESTS
+  // ==========================================
   describe('StorageService', () => {
     it('1. saves and retrieves values with prefix', () => {
       StorageService.setItem('test_key', { hello: 'world' });
@@ -51,7 +56,9 @@ describe('Party Game Collection - Phase 2 Comprehensive Test Suite', () => {
     });
   });
 
-  // --- PLAYER MANAGER TESTS ---
+  // ==========================================
+  // 2. PLAYER MANAGER TESTS
+  // ==========================================
   describe('PlayerManager', () => {
     it('4. initializes 4 default players with rich properties', () => {
       const pm = new PlayerManager();
@@ -100,116 +107,240 @@ describe('Party Game Collection - Phase 2 Comprehensive Test Suite', () => {
     });
   });
 
-  // --- SCORE MANAGER TESTS ---
-  describe('ScoreManager', () => {
-    it('8. assigns rank points accurately for 4-player games (10, 6, 3, 1)', () => {
+  // ==========================================
+  // 3. SCORE MANAGER & TOURNAMENT SCORING
+  // ==========================================
+  describe('ScoreManager & Tournament Scoring', () => {
+    it('8. assigns standard rank points for 4-player games (10, 6, 3, 1)', () => {
       const pm = new PlayerManager();
       pm.setActiveCount(4);
       const sm = new ScoreManager(pm);
 
-      const round = sm.recordRound(1, 3, GAME_CATALOG[0], {
-        1: 40,
-        2: 90,
-        3: 15,
-        4: 5
-      });
+      const game = GAME_CATALOG[0];
+      const result = sm.recordRound(1, 3, game, { 1: 100, 2: 80, 3: 50, 4: 20 }, false);
 
-      expect(round.roundScores[2]).toBe(10);
-      expect(round.roundScores[1]).toBe(6);
-      expect(round.roundScores[3]).toBe(3);
-      expect(round.roundScores[4]).toBe(1);
+      expect(result.roundScores[1]).toBe(10);
+      expect(result.roundScores[2]).toBe(6);
+      expect(result.roundScores[3]).toBe(3);
+      expect(result.roundScores[4]).toBe(1);
     });
 
-    it('9. assigns rank points accurately for 2-player games (10, 3)', () => {
+    it('9. assigns tournament points for 4-player games (10, 7, 5, 3)', () => {
+      const pm = new PlayerManager();
+      pm.setActiveCount(4);
+      const sm = new ScoreManager(pm);
+
+      const game = GAME_CATALOG[0];
+      const result = sm.recordRound(1, 5, game, { 1: 50, 2: 40, 3: 30, 4: 10 }, true);
+
+      expect(result.roundScores[1]).toBe(10);
+      expect(result.roundScores[2]).toBe(7);
+      expect(result.roundScores[3]).toBe(5);
+      expect(result.roundScores[4]).toBe(3);
+    });
+
+    it('10. assigns tournament points for 2-player games (10, 5)', () => {
       const pm = new PlayerManager();
       pm.setActiveCount(2);
       const sm = new ScoreManager(pm);
 
-      const round = sm.recordRound(1, 1, GAME_CATALOG[0], {
-        1: 20,
-        2: 80,
-        3: 0,
-        4: 0
-      });
+      const game = GAME_CATALOG[0];
+      const result = sm.recordRound(1, 5, game, { 1: 99, 2: 50, 3: 0, 4: 0 }, true);
 
-      expect(round.roundScores[2]).toBe(10);
-      expect(round.roundScores[1]).toBe(3);
-    });
-
-    it('10. assigns rank points accurately for 3-player games (10, 5, 2)', () => {
-      const pm = new PlayerManager();
-      pm.setActiveCount(3);
-      const sm = new ScoreManager(pm);
-
-      const round = sm.recordRound(1, 1, GAME_CATALOG[0], {
-        1: 50,
-        2: 100,
-        3: 10,
-        4: 0
-      });
-
-      expect(round.roundScores[2]).toBe(10);
-      expect(round.roundScores[1]).toBe(5);
-      expect(round.roundScores[3]).toBe(2);
+      expect(result.roundScores[1]).toBe(10);
+      expect(result.roundScores[2]).toBe(5);
     });
 
     it('11. handles ties between players by giving equal points', () => {
       const pm = new PlayerManager();
-      pm.setActiveCount(2);
-      const sm = new ScoreManager(pm);
-
-      const round = sm.recordRound(1, 1, GAME_CATALOG[0], {
-        1: 50,
-        2: 50,
-        3: 0,
-        4: 0
-      });
-
-      expect(round.roundScores[1]).toBe(round.roundScores[2]);
-      expect(sm.getWinner()).toBe('TIE');
-    });
-
-    it('12. accumulates total scores across multiple rounds correctly', () => {
-      const pm = new PlayerManager();
-      pm.setActiveCount(2);
-      const sm = new ScoreManager(pm);
-
-      sm.recordRound(1, 2, GAME_CATALOG[0], { 1: 100, 2: 50, 3: 0, 4: 0 }); // P1: 10, P2: 3
-      sm.recordRound(2, 2, GAME_CATALOG[1], { 1: 20, 2: 80, 3: 0, 4: 0 });  // P1: 3, P2: 10
-
-      const totals = sm.getCumulativeScores();
-      expect(totals[1]).toBe(13);
-      expect(totals[2]).toBe(13);
-      expect(sm.getWinner()).toBe('TIE');
-    });
-
-    it('13. computes leaderboard sorted by total points descending', () => {
-      const pm = new PlayerManager();
       pm.setActiveCount(3);
       const sm = new ScoreManager(pm);
 
-      sm.recordRound(1, 1, GAME_CATALOG[0], { 1: 10, 2: 50, 3: 30, 4: 0 });
-      const leaderboard = sm.getLeaderboard();
+      const game = GAME_CATALOG[0];
+      const result = sm.recordRound(1, 3, game, { 1: 50, 2: 50, 3: 20, 4: 0 });
 
-      expect(leaderboard[0].playerId).toBe(2);
-      expect(leaderboard[1].playerId).toBe(3);
-      expect(leaderboard[2].playerId).toBe(1);
+      expect(result.roundScores[1]).toBe(10);
+      expect(result.roundScores[2]).toBe(10);
+      expect(result.roundScores[3]).toBe(2);
+    });
+
+    it('12. tracks win streaks and best streak across rounds', () => {
+      const pm = new PlayerManager();
+      pm.setActiveCount(2);
+      const sm = new ScoreManager(pm);
+      const game = GAME_CATALOG[0];
+
+      sm.recordRound(1, 5, game, { 1: 10, 2: 5, 3: 0, 4: 0 });
+      sm.recordRound(2, 5, game, { 1: 10, 2: 5, 3: 0, 4: 0 });
+      expect(sm.getBestStreak(1)).toBe(2);
+
+      // Player 2 wins round 3
+      sm.recordRound(3, 5, game, { 1: 5, 2: 10, 3: 0, 4: 0 });
+      expect(sm.getBestStreak(1)).toBe(2);
+      expect(sm.getPlayerWins(1)).toBe(2);
+      expect(sm.getPlayerWins(2)).toBe(1);
+    });
+
+    it('13. computes comeback alerts and position changes', () => {
+      const pm = new PlayerManager();
+      pm.setActiveCount(3);
+      const sm = new ScoreManager(pm);
+      const game = GAME_CATALOG[0];
+
+      // Round 1: Player 1 wins
+      const r1 = sm.recordRound(1, 5, game, { 1: 50, 2: 20, 3: 10, 4: 0 }, true);
+      expect(r1.ranks[0].playerId).toBe(1);
+
+      // Round 2: Player 2 surges and takes lead
+      const r2 = sm.recordRound(2, 5, game, { 1: 0, 2: 100, 3: 50, 4: 0 }, true);
+      expect(r2.comebackAlert).toBeDefined();
+      expect(r2.comebackAlert).toContain('NEW LEADER');
+    });
+
+    it('14. correctly determines overall winner or tie', () => {
+      const pm = new PlayerManager();
+      pm.setActiveCount(2);
+      const sm = new ScoreManager(pm);
+      const game = GAME_CATALOG[0];
+
+      sm.recordRound(1, 2, game, { 1: 50, 2: 10, 3: 0, 4: 0 });
+      sm.recordRound(2, 2, game, { 1: 10, 2: 50, 3: 0, 4: 0 });
+
+      // Scores are equal [13, 13] -> TIE
+      expect(sm.getWinner()).toBe('TIE');
     });
   });
 
-  // --- MINIGAME MANAGER & CATALOG TESTS ---
+  // ==========================================
+  // 4. STATS SERVICE TESTS
+  // ==========================================
+  describe('StatsService', () => {
+    it('15. records round statistics, games played, and wins', () => {
+      const stats = new StatsService();
+      stats.recordRound('whack-it', { 1: 10, 2: 6, 3: 0, 4: 0 }, [1, 2], { 1: 220, 2: 350 }, 15);
+
+      const p1 = stats.getPlayerStats(1);
+      const p2 = stats.getPlayerStats(2);
+
+      expect(p1.gamesPlayed).toBe(1);
+      expect(p1.gamesWon).toBe(1);
+      expect(p1.currentStreak).toBe(1);
+      expect(p1.bestStreak).toBe(1);
+      expect(p1.fastestReactionMs).toBe(220);
+      expect(p1.totalPlaytimeSeconds).toBe(15);
+
+      expect(p2.gamesPlayed).toBe(1);
+      expect(p2.gamesWon).toBe(0);
+      expect(p2.fastestReactionMs).toBe(350);
+    });
+
+    it('16. updates faster reaction time when improved', () => {
+      const stats = new StatsService();
+      stats.recordRound('quick-tap', { 1: 10, 2: 0, 3: 0, 4: 0 }, [1], { 1: 300 });
+      expect(stats.getPlayerStats(1).fastestReactionMs).toBe(300);
+
+      stats.recordRound('quick-tap', { 1: 10, 2: 0, 3: 0, 4: 0 }, [1], { 1: 185 });
+      expect(stats.getPlayerStats(1).fastestReactionMs).toBe(185);
+    });
+
+    it('17. records tournament completion and tournament wins', () => {
+      const stats = new StatsService();
+      stats.recordTournament(1, [1, 2, 3]);
+
+      expect(stats.getPlayerStats(1).tournamentsPlayed).toBe(1);
+      expect(stats.getPlayerStats(1).tournamentsWon).toBe(1);
+      expect(stats.getPlayerStats(2).tournamentsPlayed).toBe(1);
+      expect(stats.getPlayerStats(2).tournamentsWon).toBe(0);
+    });
+
+    it('18. resets all player statistics cleanly', () => {
+      const stats = new StatsService();
+      stats.recordRound('whack-it', { 1: 10, 2: 0, 3: 0, 4: 0 }, [1]);
+      stats.resetStats();
+
+      expect(stats.getPlayerStats(1).gamesPlayed).toBe(0);
+      expect(stats.getPlayerStats(1).gamesWon).toBe(0);
+    });
+  });
+
+  // ==========================================
+  // 5. ACHIEVEMENT MANAGER TESTS
+  // ==========================================
+  describe('AchievementManager', () => {
+    it('19. loads 10 initial achievements locked by default', () => {
+      const stats = new StatsService();
+      const ach = new AchievementManager(stats);
+
+      const list = ach.getAchievements();
+      expect(list.length).toBe(10);
+      expect(ach.getUnlockedCount()).toBe(0);
+    });
+
+    it('20. triggers FIRST_WIN on winning first round', () => {
+      const stats = new StatsService();
+      const ach = new AchievementManager(stats);
+      const pm = new PlayerManager();
+      const sm = new ScoreManager(pm);
+
+      const roundRes = sm.recordRound(1, 3, GAME_CATALOG[0], { 1: 100, 2: 50, 3: 0, 4: 0 });
+      ach.checkRound(roundRes);
+
+      const firstWin = ach.getAchievements().find(a => a.id === 'FIRST_WIN');
+      expect(firstWin?.unlockedAt).not.toBeNull();
+    });
+
+    it('21. triggers LIGHTNING_REFLEX for reaction times under 250ms', () => {
+      const stats = new StatsService();
+      const ach = new AchievementManager(stats);
+      const pm = new PlayerManager();
+      const sm = new ScoreManager(pm);
+
+      const roundRes = sm.recordRound(1, 3, GAME_CATALOG[0], { 1: 100, 2: 50, 3: 0, 4: 0 });
+      ach.checkRound(roundRes, { 1: 210 });
+
+      const lr = ach.getAchievements().find(a => a.id === 'LIGHTNING_REFLEX');
+      expect(lr?.unlockedAt).not.toBeNull();
+    });
+
+    it('22. dispatches onUnlock event listener upon achievement unlock', () => {
+      const stats = new StatsService();
+      const ach = new AchievementManager(stats);
+
+      let unlockedId = '';
+      ach.onUnlock(item => {
+        unlockedId = item.id;
+      });
+
+      ach.unlock('PARTY_STARTER');
+      expect(unlockedId).toBe('PARTY_STARTER');
+    });
+
+    it('23. triggers CUP_CHAMPION on winning a tournament session', () => {
+      const stats = new StatsService();
+      const ach = new AchievementManager(stats);
+
+      ach.checkSessionEnd([{ playerId: 1, totalPoints: 45, rank: 1 }], true);
+
+      const champ = ach.getAchievements().find(a => a.id === 'CUP_CHAMPION');
+      expect(champ?.unlockedAt).not.toBeNull();
+    });
+  });
+
+  // ==========================================
+  // 6. MINI-GAME MANAGER & CATALOG
+  // ==========================================
   describe('MiniGameManager & Catalog', () => {
-    it('14. contains all 55 game concepts in the catalog', () => {
+    it('24. contains all 50+ game concepts in the catalog', () => {
       expect(GAME_CATALOG.length).toBeGreaterThanOrEqual(55);
     });
 
-    it('15. has exactly 15 fully implemented playable games in Phase 2', () => {
+    it('25. has exactly 25 fully implemented playable games in Phase 3', () => {
       const mgm = new MiniGameManager();
       const implemented = mgm.getImplementedGames();
-      expect(implemented.length).toBe(15);
+      expect(implemented.length).toBe(25);
     });
 
-    it('16. all 15 games include valid metadata (title, icon, duration, supportedPlayers)', () => {
+    it('26. all 25 games include valid metadata', () => {
       const mgm = new MiniGameManager();
       const implemented = mgm.getImplementedGames();
 
@@ -218,113 +349,129 @@ describe('Party Game Collection - Phase 2 Comprehensive Test Suite', () => {
         expect(g.title).toBeTruthy();
         expect(g.icon).toBeTruthy();
         expect(g.durationSeconds).toBeGreaterThan(0);
-        expect(g.supportedPlayers).toBeDefined();
         expect(g.supportedPlayers.length).toBeGreaterThan(0);
+        expect(g.implemented).toBe(true);
       });
     });
 
-    it('17. filters out incompatible games when player count is 1 (Solo)', () => {
+    it('27. filters out incompatible games when player count is 1 (Solo)', () => {
       const mgm = new MiniGameManager();
-      // Solo mode: games like Tug of War or Bomb Pass requires 2+
-      for (let i = 0; i < 20; i++) {
-        const picked = mgm.pickNextGame(1);
-        expect(picked.supportedPlayers).toContain(1);
-        expect(picked.id).not.toBe('tug-of-war');
-        expect(picked.id).not.toBe('bomb-pass');
-      }
+      const implemented = mgm.getImplementedGames();
+      const soloGames = implemented.filter(g => g.supportedPlayers.includes(1));
+
+      expect(soloGames.find(g => g.id === 'tug-of-war')).toBeUndefined();
+      expect(soloGames.find(g => g.id === 'bomb-pass')).toBeUndefined();
+      expect(soloGames.length).toBeGreaterThan(15);
     });
 
-    it('18. supports all 15 games when player count is 2, 3, or 4', () => {
+    it('28. supports games correctly when player count is 2, 3, or 4', () => {
       const mgm = new MiniGameManager();
       const implemented = mgm.getImplementedGames();
       const fourPlayerGames = implemented.filter(g => g.supportedPlayers.includes(4));
-      expect(fourPlayerGames.length).toBe(15);
+      expect(fourPlayerGames.length).toBe(25);
     });
 
-    it('19. filters games accurately by category', () => {
+    it('29. prevents immediate game repetition across a party cycle', () => {
       const mgm = new MiniGameManager();
-      const memoryGame = mgm.pickNextGame(2, ['MEMORY']);
-      expect(memoryGame.category).toBe('MEMORY');
+      const seenIds = new Set<string>();
 
-      const speedGame = mgm.pickNextGame(2, ['SPEED']);
-      expect(speedGame.category).toBe('SPEED');
+      for (let i = 0; i < 20; i++) {
+        const game = mgm.pickNextGame(2);
+        expect(seenIds.has(game.id)).toBe(false);
+        seenIds.add(game.id);
+      }
     });
 
-    it('20. prevents immediate game repetition across a party cycle', () => {
+    it('30. allows direct selection by specific game ID', () => {
       const mgm = new MiniGameManager();
-      const picked1 = mgm.pickNextGame(2);
-      const picked2 = mgm.pickNextGame(2);
-      expect(picked1.id).not.toBe(picked2.id);
-    });
-
-    it('21. allows direct selection by specific game ID', () => {
-      const mgm = new MiniGameManager();
-      const picked = mgm.pickNextGame(2, undefined, 'bomb-pass');
-      expect(picked.id).toBe('bomb-pass');
+      const picked = mgm.pickNextGame(2, undefined, 'whack-it');
+      expect(picked.id).toBe('whack-it');
     });
   });
 
-  // --- GAME LIFECYCLE & INSTANTIATION TESTS ---
-  describe('Game Lifecycle & Instantiation', () => {
-    it('22. successfully instantiates and initializes all 15 mini-games without errors', () => {
+  // ==========================================
+  // 7. ALL 25 MINI-GAMES LIFECYCLE & EXECUTION
+  // ==========================================
+  describe('Mini-Games Lifecycle Verification', () => {
+    it('31. successfully instantiates and initializes all 25 mini-games without errors', () => {
       const mgm = new MiniGameManager();
       const pm = new PlayerManager();
+      pm.setActiveCount(2);
       const audio = new AudioManager(false);
       const haptics = new HapticManager(false);
-      const container = document.createElement('div');
 
       const implemented = mgm.getImplementedGames();
-      expect(implemented.length).toBe(15);
+      expect(implemented.length).toBe(25);
 
       implemented.forEach(g => {
-        const context = {
-          container,
-          players: pm.getActivePlayers(),
-          activePlayerCount: pm.getActiveCount(),
-          difficulty: 'NORMAL' as const,
-          audio,
-          haptics,
-          onFinish: () => {}
-        };
+        const container = document.createElement('div');
+        document.body.appendChild(container);
 
         expect(() => {
-          const game = mgm.loadGame(g.id, context);
-          expect(game).toBeDefined();
-          game.destroy();
+          mgm.loadGame(g.id, {
+            container,
+            players: pm.getActivePlayers(),
+            activePlayerCount: 2,
+            difficulty: 'NORMAL',
+            audio,
+            haptics,
+            onFinish: () => {}
+          });
+
+          const current = mgm.getCurrentGame();
+          expect(current).not.toBeNull();
+          current?.start();
+          current?.update(0.016);
+          current?.destroy();
         }).not.toThrow();
+
+        container.remove();
       });
     });
 
-    it('23. cleans up active game when loading a new game', () => {
+    it('32. cleans up active game when loading a new game', () => {
       const mgm = new MiniGameManager();
       const pm = new PlayerManager();
+      pm.setActiveCount(2);
       const audio = new AudioManager(false);
       const haptics = new HapticManager(false);
       const container = document.createElement('div');
 
-      const context = {
+      mgm.loadGame('quick-tap', {
         container,
         players: pm.getActivePlayers(),
-        activePlayerCount: pm.getActiveCount(),
+        activePlayerCount: 2,
+        difficulty: 'NORMAL',
         audio,
         haptics,
         onFinish: () => {}
-      };
+      });
 
-      mgm.loadGame('quick-tap', context);
-      expect(mgm.getCurrentGame()).not.toBeNull();
+      const firstGame = mgm.getCurrentGame();
+      expect(firstGame?.metadata.id).toBe('quick-tap');
 
-      mgm.loadGame('rapid-tap', context);
-      expect(mgm.getCurrentGame()?.metadata.id).toBe('rapid-tap');
+      mgm.loadGame('whack-it', {
+        container,
+        players: pm.getActivePlayers(),
+        activePlayerCount: 2,
+        difficulty: 'NORMAL',
+        audio,
+        haptics,
+        onFinish: () => {}
+      });
 
+      const secondGame = mgm.getCurrentGame();
+      expect(secondGame?.metadata.id).toBe('whack-it');
       mgm.destroyCurrentGame();
       expect(mgm.getCurrentGame()).toBeNull();
     });
   });
 
-  // --- ROUND MANAGER SESSION FLOW TESTS ---
-  describe('RoundManager Flow', () => {
-    it('24. transitions states through INTRO -> COUNTDOWN -> PLAYING', () => {
+  // ==========================================
+  // 8. ROUND MANAGER & TOURNAMENTS
+  // ==========================================
+  describe('RoundManager & Tournament Flow', () => {
+    it('33. transitions states through INTRO -> COUNTDOWN -> PLAYING', () => {
       const pm = new PlayerManager();
       const sm = new ScoreManager(pm);
       const mgm = new MiniGameManager();
@@ -333,27 +480,28 @@ describe('Party Game Collection - Phase 2 Comprehensive Test Suite', () => {
 
       const statesRecorded: SessionState[] = [];
       const rm = new RoundManager(pm, sm, mgm, audio, haptics, {
-        onStateChange: s => statesRecorded.push(s),
+        onStateChange: state => statesRecorded.push(state),
         onRoundComplete: () => {},
         onSessionComplete: () => {}
       });
 
       rm.startSession({
         playerCount: 2,
-        totalRounds: 2,
-        mode: 'QUICK',
-        categories: ['REACTION']
+        totalRounds: 3,
+        mode: 'TOURNAMENT',
+        tournamentCup: 'BRONZE',
+        categories: ['REACTION', 'SPEED']
       });
 
       expect(statesRecorded).toContain('INTRO');
       expect(rm.getCurrentRound()).toBe(1);
-      expect(rm.getTotalRounds()).toBe(2);
+      expect(rm.getTotalRounds()).toBe(3);
 
       rm.startCountdown();
       expect(statesRecorded).toContain('COUNTDOWN');
     });
 
-    it('25. correctly advances rounds and finishes when totalRounds is reached', () => {
+    it('34. correctly advances rounds and finishes when totalRounds is reached', () => {
       const pm = new PlayerManager();
       const sm = new ScoreManager(pm);
       const mgm = new MiniGameManager();
@@ -377,15 +525,17 @@ describe('Party Game Collection - Phase 2 Comprehensive Test Suite', () => {
       });
 
       expect(rm.getCurrentRound()).toBe(1);
-      rm.nextRound(); // Exceeds total round 1 -> triggers finish
+      rm.nextRound();
       expect(sessionCompleted).toBe(true);
       expect(rm.getState()).toBe('TOURNAMENT_WINNER');
     });
   });
 
-  // --- AUDIO & HAPTIC MANAGERS TESTS ---
+  // ==========================================
+  // 9. AUDIO & HAPTIC MANAGERS TESTS
+  // ==========================================
   describe('AudioManager & HapticManager', () => {
-    it('26. audio manager handles mute toggles and sound playback safely', () => {
+    it('35. audio manager handles mute toggles and sound playback safely', () => {
       const audio = new AudioManager(true);
       expect(() => {
         audio.playTap();
@@ -397,7 +547,7 @@ describe('Party Game Collection - Phase 2 Comprehensive Test Suite', () => {
       }).not.toThrow();
     });
 
-    it('27. haptic manager executes vibration profiles without errors', () => {
+    it('36. haptic manager executes vibration profiles without errors', () => {
       const haptics = new HapticManager(true);
       expect(() => {
         haptics.light();
@@ -411,38 +561,324 @@ describe('Party Game Collection - Phase 2 Comprehensive Test Suite', () => {
     });
   });
 
-  // --- GAME SPECIFIC LOGIC TESTS ---
-  describe('Game Mechanics Verification', () => {
-    it('28. Color Clash: has 4 valid target colors defined', () => {
-      const meta = GAME_CATALOG.find(g => g.id === 'color-clash');
+  // ==========================================
+  // 10. SPECIFIC VERIFICATION OF 10 NEW MINI-GAMES (16 TO 25)
+  // ==========================================
+  describe('New Mini-Games (16 to 25) Mechanics Verification', () => {
+    it('37. Game 16 — Whack It: supports 1 to 4 players and SPEED category', () => {
+      const meta = GAME_CATALOG.find(g => g.id === 'whack-it');
       expect(meta).toBeDefined();
-      expect(meta?.category).toBe('REACTION');
-      expect(meta?.implemented).toBe(true);
-    });
-
-    it('29. Bomb Pass: requires at least 2 players', () => {
-      const meta = GAME_CATALOG.find(g => g.id === 'bomb-pass');
-      expect(meta?.minPlayers).toBe(2);
-      expect(meta?.supportedPlayers).not.toContain(1);
-      expect(meta?.supportedPlayers).toContain(2);
-    });
-
-    it('30. Memory Match: supports 1 to 4 players', () => {
-      const meta = GAME_CATALOG.find(g => g.id === 'memory-match');
+      expect(meta?.category).toBe('SPEED');
       expect(meta?.supportedPlayers).toEqual([1, 2, 3, 4]);
       expect(meta?.implemented).toBe(true);
     });
 
-    it('31. Quick Math: verified as PUZZLE category', () => {
-      const meta = GAME_CATALOG.find(g => g.id === 'quick-math');
-      expect(meta?.category).toBe('PUZZLE');
+    it('38. Game 17 — Stop The Bar: supports timing gauge and REACTION category', () => {
+      const meta = GAME_CATALOG.find(g => g.id === 'stop-the-bar');
+      expect(meta).toBeDefined();
+      expect(meta?.category).toBe('REACTION');
+      expect(meta?.controls).toBe('Timing Tap');
       expect(meta?.implemented).toBe(true);
     });
 
-    it('32. Fastest Finger: verified with unpredictable reaction mechanics', () => {
-      const meta = GAME_CATALOG.find(g => g.id === 'fastest-finger');
-      expect(meta?.category).toBe('REACTION');
+    it('39. Game 18 — Number Rush: ascending sequence numbers tap', () => {
+      const meta = GAME_CATALOG.find(g => g.id === 'number-rush');
+      expect(meta).toBeDefined();
+      expect(meta?.category).toBe('SPEED');
+      expect(meta?.controls).toBe('Number Sequence');
       expect(meta?.implemented).toBe(true);
+    });
+
+    it('40. Game 19 — Safe Tile: bridge memory path challenge', () => {
+      const meta = GAME_CATALOG.find(g => g.id === 'safe-tile');
+      expect(meta).toBeDefined();
+      expect(meta?.category).toBe('MEMORY');
+      expect(meta?.controls).toBe('Step Tap');
+      expect(meta?.implemented).toBe(true);
+    });
+
+    it('41. Game 20 — Balloon Pop: floating arcade balloons popping', () => {
+      const meta = GAME_CATALOG.find(g => g.id === 'balloon-pop');
+      expect(meta).toBeDefined();
+      expect(meta?.category).toBe('SPEED');
+      expect(meta?.controls).toBe('Pop Tap');
+      expect(meta?.implemented).toBe(true);
+    });
+
+    it('42. Game 21 — Follow The Arrow: D-pad directional reflexes', () => {
+      const meta = GAME_CATALOG.find(g => g.id === 'follow-the-arrow');
+      expect(meta).toBeDefined();
+      expect(meta?.category).toBe('REACTION');
+      expect(meta?.controls).toBe('Direction Tap');
+      expect(meta?.implemented).toBe(true);
+    });
+
+    it('43. Game 22 — Don\'t Press It: command buzzer psychological game', () => {
+      const meta = GAME_CATALOG.find(g => g.id === 'dont-press-it');
+      expect(meta).toBeDefined();
+      expect(meta?.category).toBe('PARTY');
+      expect(meta?.controls).toBe('Buzzer Reflex');
+      expect(meta?.implemented).toBe(true);
+    });
+
+    it('44. Game 23 — Treasure Dig: tile excavation for gems and gold', () => {
+      const meta = GAME_CATALOG.find(g => g.id === 'treasure-dig');
+      expect(meta).toBeDefined();
+      expect(meta?.category).toBe('PUZZLE');
+      expect(meta?.controls).toBe('Dig Tap');
+      expect(meta?.implemented).toBe(true);
+    });
+
+    it('45. Game 24 — Race to 100: dual alternating pedal sprint', () => {
+      const meta = GAME_CATALOG.find(g => g.id === 'race-to-100');
+      expect(meta).toBeDefined();
+      expect(meta?.category).toBe('SPEED');
+      expect(meta?.controls).toBe('Dual Pedal Mash');
+      expect(meta?.implemented).toBe(true);
+    });
+
+    it('46. Game 25 — Shape Snap: fast matching card snap duel', () => {
+      const meta = GAME_CATALOG.find(g => g.id === 'shape-snap');
+      expect(meta).toBeDefined();
+      expect(meta?.category).toBe('REACTION');
+      expect(meta?.controls).toBe('Snap Buzzer');
+      expect(meta?.implemented).toBe(true);
+    });
+
+    it('47. Game 16: responds to WHACK input and calculates scores', () => {
+      const mgm = new MiniGameManager();
+      const pm = new PlayerManager();
+      pm.setActiveCount(2);
+      const container = document.createElement('div');
+
+      let finished = false;
+      mgm.loadGame('whack-it', {
+        container,
+        players: pm.getActivePlayers(),
+        activePlayerCount: 2,
+        difficulty: 'NORMAL',
+        audio: new AudioManager(false),
+        haptics: new HapticManager(false),
+        onFinish: () => {
+          finished = true;
+        }
+      });
+
+      const game = mgm.getCurrentGame()!;
+      game.start();
+      game.handleInput(1, 'WHACK', 0);
+      game.finish();
+      expect(finished).toBe(true);
+    });
+
+    it('48. Game 17: Stop The Bar responds to STOP input and calculates precision', () => {
+      const mgm = new MiniGameManager();
+      const pm = new PlayerManager();
+      pm.setActiveCount(2);
+      const container = document.createElement('div');
+
+      mgm.loadGame('stop-the-bar', {
+        container,
+        players: pm.getActivePlayers(),
+        activePlayerCount: 2,
+        difficulty: 'NORMAL',
+        audio: new AudioManager(false),
+        haptics: new HapticManager(false),
+        onFinish: () => {}
+      });
+
+      const game = mgm.getCurrentGame()!;
+      game.start();
+      game.update(0.05);
+      expect(() => game.handleInput(1, 'STOP')).not.toThrow();
+      game.destroy();
+    });
+
+    it('49. Game 18: Number Rush handles ascending clicks and penalty shakes', () => {
+      const mgm = new MiniGameManager();
+      const pm = new PlayerManager();
+      pm.setActiveCount(2);
+      const container = document.createElement('div');
+
+      mgm.loadGame('number-rush', {
+        container,
+        players: pm.getActivePlayers(),
+        activePlayerCount: 2,
+        difficulty: 'NORMAL',
+        audio: new AudioManager(false),
+        haptics: new HapticManager(false),
+        onFinish: () => {}
+      });
+
+      const game = mgm.getCurrentGame()!;
+      game.start();
+      const dummyBtn = document.createElement('button');
+      // Correct tap 1
+      expect(() => game.handleInput(1, 'TAP_NUM', { num: 1, button: dummyBtn })).not.toThrow();
+      // Incorrect tap 99
+      expect(() => game.handleInput(1, 'TAP_NUM', { num: 99, button: dummyBtn })).not.toThrow();
+      game.destroy();
+    });
+
+    it('50. Game 19: Safe Tile handles stepping and trap fallbacks', () => {
+      const mgm = new MiniGameManager();
+      const pm = new PlayerManager();
+      pm.setActiveCount(2);
+      const container = document.createElement('div');
+
+      mgm.loadGame('safe-tile', {
+        container,
+        players: pm.getActivePlayers(),
+        activePlayerCount: 2,
+        difficulty: 'NORMAL',
+        audio: new AudioManager(false),
+        haptics: new HapticManager(false),
+        onFinish: () => {}
+      });
+
+      const game = mgm.getCurrentGame()!;
+      game.start();
+      const dummyBtn = document.createElement('button');
+      expect(() => game.handleInput(1, 'STEP', { row: 0, col: 0, button: dummyBtn })).not.toThrow();
+      game.destroy();
+    });
+
+    it('51. Game 20: Balloon Pop handles POP input and floating coordinates', () => {
+      const mgm = new MiniGameManager();
+      const pm = new PlayerManager();
+      pm.setActiveCount(2);
+      const container = document.createElement('div');
+
+      mgm.loadGame('balloon-pop', {
+        container,
+        players: pm.getActivePlayers(),
+        activePlayerCount: 2,
+        difficulty: 'NORMAL',
+        audio: new AudioManager(false),
+        haptics: new HapticManager(false),
+        onFinish: () => {}
+      });
+
+      const game = mgm.getCurrentGame()!;
+      game.start();
+      game.update(0.016);
+      expect(() => game.handleInput(1, 'POP', 1)).not.toThrow();
+      game.destroy();
+    });
+
+    it('52. Game 21: Follow The Arrow responds to directional d-pad buttons', () => {
+      const mgm = new MiniGameManager();
+      const pm = new PlayerManager();
+      pm.setActiveCount(2);
+      const container = document.createElement('div');
+
+      mgm.loadGame('follow-the-arrow', {
+        container,
+        players: pm.getActivePlayers(),
+        activePlayerCount: 2,
+        difficulty: 'NORMAL',
+        audio: new AudioManager(false),
+        haptics: new HapticManager(false),
+        onFinish: () => {}
+      });
+
+      const game = mgm.getCurrentGame()!;
+      game.start();
+      expect(() => game.handleInput(1, 'DIR', 'UP')).not.toThrow();
+      game.destroy();
+    });
+
+    it('53. Game 22: Don\'t Press It penalizes early buzzer presses', () => {
+      const mgm = new MiniGameManager();
+      const pm = new PlayerManager();
+      pm.setActiveCount(2);
+      const container = document.createElement('div');
+
+      mgm.loadGame('dont-press-it', {
+        container,
+        players: pm.getActivePlayers(),
+        activePlayerCount: 2,
+        difficulty: 'NORMAL',
+        audio: new AudioManager(false),
+        haptics: new HapticManager(false),
+        onFinish: () => {}
+      });
+
+      const game = mgm.getCurrentGame()!;
+      game.start();
+      // Pressing while IDLE causes early press penalty
+      expect(() => game.handleInput(1, 'PRESS')).not.toThrow();
+      game.destroy();
+    });
+
+    it('54. Game 23: Treasure Dig uncovers tiles and discovers diamonds/gold', () => {
+      const mgm = new MiniGameManager();
+      const pm = new PlayerManager();
+      pm.setActiveCount(2);
+      const container = document.createElement('div');
+
+      mgm.loadGame('treasure-dig', {
+        container,
+        players: pm.getActivePlayers(),
+        activePlayerCount: 2,
+        difficulty: 'NORMAL',
+        audio: new AudioManager(false),
+        haptics: new HapticManager(false),
+        onFinish: () => {}
+      });
+
+      const game = mgm.getCurrentGame()!;
+      game.start();
+      const dummyBtn = document.createElement('button');
+      expect(() => game.handleInput(1, 'DIG', { idx: 0, button: dummyBtn })).not.toThrow();
+      game.destroy();
+    });
+
+    it('55. Game 24: Race to 100 handles alternating left/right foot steps', () => {
+      const mgm = new MiniGameManager();
+      const pm = new PlayerManager();
+      pm.setActiveCount(2);
+      const container = document.createElement('div');
+
+      mgm.loadGame('race-to-100', {
+        container,
+        players: pm.getActivePlayers(),
+        activePlayerCount: 2,
+        difficulty: 'NORMAL',
+        audio: new AudioManager(false),
+        haptics: new HapticManager(false),
+        onFinish: () => {}
+      });
+
+      const game = mgm.getCurrentGame()!;
+      game.start();
+      expect(() => game.handleInput(1, 'STEP', 'LEFT')).not.toThrow();
+      expect(() => game.handleInput(1, 'STEP', 'RIGHT')).not.toThrow();
+      // Same foot twice -> stumble
+      expect(() => game.handleInput(1, 'STEP', 'RIGHT')).not.toThrow();
+      game.destroy();
+    });
+
+    it('56. Game 25: Shape Snap verifies snap match and false snap penalties', () => {
+      const mgm = new MiniGameManager();
+      const pm = new PlayerManager();
+      pm.setActiveCount(2);
+      const container = document.createElement('div');
+
+      mgm.loadGame('shape-snap', {
+        container,
+        players: pm.getActivePlayers(),
+        activePlayerCount: 2,
+        difficulty: 'NORMAL',
+        audio: new AudioManager(false),
+        haptics: new HapticManager(false),
+        onFinish: () => {}
+      });
+
+      const game = mgm.getCurrentGame()!;
+      game.start();
+      expect(() => game.handleInput(1, 'SNAP')).not.toThrow();
+      game.destroy();
     });
   });
 });

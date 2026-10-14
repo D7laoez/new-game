@@ -2,6 +2,8 @@ import { PlayerManager } from '../services/PlayerManager.ts';
 import { ScoreManager } from '../services/ScoreManager.ts';
 import { AudioManager } from '../services/AudioManager.ts';
 import { HapticManager } from '../services/HapticManager.ts';
+import { StatsService } from '../services/StatsService.ts';
+import { AchievementManager } from '../services/AchievementManager.ts';
 import { MiniGameManager } from '../core/MiniGameManager.ts';
 import { RoundManager, SessionState } from '../core/RoundManager.ts';
 import { ModalsManager } from './Modals.ts';
@@ -12,6 +14,8 @@ export class PartyApp {
   private scoreManager: ScoreManager;
   private audioManager: AudioManager;
   private hapticManager: HapticManager;
+  private statsService: StatsService;
+  private achievementManager: AchievementManager;
   private miniGameManager: MiniGameManager;
   private roundManager: RoundManager;
   private modals: ModalsManager;
@@ -27,14 +31,25 @@ export class PartyApp {
     this.scoreManager = new ScoreManager(this.playerManager);
     this.audioManager = new AudioManager(true);
     this.hapticManager = new HapticManager(true);
+    this.statsService = new StatsService();
+    this.achievementManager = new AchievementManager(this.statsService);
     this.miniGameManager = new MiniGameManager();
+
     this.modals = new ModalsManager(
       this.appRoot,
       this.playerManager,
       this.miniGameManager,
       this.audioManager,
-      this.hapticManager
+      this.hapticManager,
+      this.scoreManager,
+      this.statsService,
+      this.achievementManager
     );
+
+    // Achievement unlock listener
+    this.achievementManager.onUnlock(ach => {
+      this.modals.showAchievementToast(ach);
+    });
 
     this.roundManager = new RoundManager(
       this.playerManager,
@@ -46,7 +61,9 @@ export class PartyApp {
         onStateChange: (state, data) => this.handleSessionState(state, data),
         onRoundComplete: res => this.handleRoundComplete(res),
         onSessionComplete: lb => this.handleSessionComplete(lb)
-      }
+      },
+      this.statsService,
+      this.achievementManager
     );
 
     this.renderBaseLayout();
@@ -66,6 +83,8 @@ export class PartyApp {
               <button class="icon-btn" id="btn-player-pill" title="Configure Players">
                 <span id="player-count-label">👥 2 Players</span>
               </button>
+              <button class="icon-btn" id="btn-stats" title="Statistics">📊</button>
+              <button class="icon-btn" id="btn-achievements" title="Achievements">🏅</button>
               <button class="icon-btn" id="btn-audio-toggle" title="Toggle Sound">🔊</button>
               <button class="icon-btn" id="btn-settings" title="Settings">⚙️</button>
             </div>
@@ -86,7 +105,7 @@ export class PartyApp {
                 <div class="tile-icon">🏆</div>
                 <div class="tile-body">
                   <h3>Tournament</h3>
-                  <p>7-Round Championship with leaderboard</p>
+                  <p>Bronze, Silver, Gold & Ultimate Championship Cups</p>
                 </div>
               </div>
 
@@ -159,7 +178,19 @@ export class PartyApp {
     // Tournament
     this.appRoot.querySelector('#btn-mode-tournament')?.addEventListener('click', () => {
       this.audioManager.playTap();
-      this.modals.showPartySetup('TOURNAMENT', config => this.startParty(config));
+      this.modals.showTournamentSelect(config => this.startParty(config));
+    });
+
+    // Stats
+    this.appRoot.querySelector('#btn-stats')?.addEventListener('click', () => {
+      this.audioManager.playTap();
+      this.modals.showStatistics();
+    });
+
+    // Achievements
+    this.appRoot.querySelector('#btn-achievements')?.addEventListener('click', () => {
+      this.audioManager.playTap();
+      this.modals.showAchievements();
     });
 
     // Custom Party

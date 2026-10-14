@@ -10,6 +10,9 @@ import { ScoreManager } from '../services/ScoreManager.ts';
 import { MiniGameManager } from './MiniGameManager.ts';
 import { IAudioManager, IHapticManager } from '../types/index.ts';
 
+import { StatsService } from '../services/StatsService.ts';
+import { AchievementManager } from '../services/AchievementManager.ts';
+
 export type SessionState =
   | 'IDLE'
   | 'INTRO'
@@ -36,7 +39,9 @@ export class RoundManager {
     private miniGameManager: MiniGameManager,
     private audio: IAudioManager,
     private haptics: IHapticManager,
-    private callbacks: RoundManagerCallbacks
+    private callbacks: RoundManagerCallbacks,
+    private statsService?: StatsService,
+    private achievementManager?: AchievementManager
   ) {}
 
   startSession(config: PartyConfig): void {
@@ -103,12 +108,29 @@ export class RoundManager {
   private handleGameFinished(result: MiniGameResult): void {
     if (!this.currentGameMeta) return;
 
+    const isTournament = this.config.mode === 'TOURNAMENT';
     const roundResult = this.scoreManager.recordRound(
       this.currentRound,
       this.config.totalRounds,
       this.currentGameMeta,
-      result.scores
+      result.scores,
+      isTournament
     );
+
+    const activePlayerIds = this.playerManager.getActivePlayers().map(p => p.id);
+    if (this.statsService) {
+      this.statsService.recordRound(
+        this.currentGameMeta.id,
+        roundResult.roundScores,
+        activePlayerIds,
+        result.rawStats,
+        this.currentGameMeta.durationSeconds
+      );
+    }
+
+    if (this.achievementManager) {
+      this.achievementManager.checkRound(roundResult, result.rawStats);
+    }
 
     this.setState('ROUND_RESULTS', roundResult);
     this.callbacks.onRoundComplete(roundResult);
@@ -116,6 +138,17 @@ export class RoundManager {
 
   private finishSession(): void {
     const leaderboard = this.scoreManager.getLeaderboard();
+    const winner = this.scoreManager.getWinner();
+    const activePlayerIds = this.playerManager.getActivePlayers().map(p => p.id);
+
+    if (this.statsService) {
+      this.statsService.recordTournament(winner, activePlayerIds);
+    }
+
+    if (this.achievementManager) {
+      this.achievementManager.checkSessionEnd(leaderboard, this.config.mode === 'TOURNAMENT');
+    }
+
     this.setState('TOURNAMENT_WINNER', {
       leaderboard,
       totalRounds: this.config.totalRounds

@@ -15,6 +15,16 @@ import { TargetShootGame } from '../games/TargetShootGame.ts';
 import { ColorMemoryGame } from '../games/ColorMemoryGame.ts';
 import { BalanceGame } from '../games/BalanceGame.ts';
 import { FastestFingerGame } from '../games/FastestFingerGame.ts';
+import { WhackItGame } from '../games/WhackItGame.ts';
+import { StopTheBarGame } from '../games/StopTheBarGame.ts';
+import { NumberRushGame } from '../games/NumberRushGame.ts';
+import { SafeTileGame } from '../games/SafeTileGame.ts';
+import { BalloonPopGame } from '../games/BalloonPopGame.ts';
+import { FollowTheArrowGame } from '../games/FollowTheArrowGame.ts';
+import { DontPressItGame } from '../games/DontPressItGame.ts';
+import { TreasureDigGame } from '../games/TreasureDigGame.ts';
+import { RaceTo100Game } from '../games/RaceTo100Game.ts';
+import { ShapeSnapGame } from '../games/ShapeSnapGame.ts';
 
 type GameFactory = () => IMiniGame;
 
@@ -43,6 +53,16 @@ export class MiniGameManager {
     this.registerGame('color-memory', () => new ColorMemoryGame());
     this.registerGame('balance', () => new BalanceGame());
     this.registerGame('fastest-finger', () => new FastestFingerGame());
+    this.registerGame('whack-it', () => new WhackItGame());
+    this.registerGame('stop-the-bar', () => new StopTheBarGame());
+    this.registerGame('number-rush', () => new NumberRushGame());
+    this.registerGame('safe-tile', () => new SafeTileGame());
+    this.registerGame('balloon-pop', () => new BalloonPopGame());
+    this.registerGame('follow-the-arrow', () => new FollowTheArrowGame());
+    this.registerGame('dont-press-it', () => new DontPressItGame());
+    this.registerGame('treasure-dig', () => new TreasureDigGame());
+    this.registerGame('race-to-100', () => new RaceTo100Game());
+    this.registerGame('shape-snap', () => new ShapeSnapGame());
   }
 
   registerGame(id: string, factory: GameFactory): void {

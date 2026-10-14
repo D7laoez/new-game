@@ -65,23 +65,61 @@ export interface IMiniGame {
   destroy(): void;
 }
 
+export type TournamentCup = 'BRONZE' | 'SILVER' | 'GOLD' | 'ULTIMATE' | 'CUSTOM';
+
+export interface LeaderboardEntry {
+  playerId: PlayerId;
+  roundPoints: number;
+  totalPoints: number;
+  rank: number;
+  previousRank?: number;
+  rankChange?: number; // positive = climbed, negative = dropped, 0 = same
+  diffToLeader?: number;
+}
+
 export interface RoundResult {
   roundNumber: number;
   totalRounds: number;
   game: GameMetadata;
   roundScores: Record<PlayerId, number>;
   totalScores: Record<PlayerId, number>;
-  ranks: { playerId: PlayerId; roundPoints: number; totalPoints: number; rank: number }[];
+  ranks: LeaderboardEntry[];
   isFinalRound: boolean;
+  comebackAlert?: string;
+  isNewLeader?: boolean;
 }
 
 export interface PartyConfig {
   playerCount: number;
   totalRounds: number;
   mode: 'QUICK' | 'CUSTOM' | 'TOURNAMENT' | 'SINGLE';
+  tournamentCup?: TournamentCup;
   categories: GameCategory[];
   difficulty?: GameDifficulty;
   specificGameId?: string;
+}
+
+export interface PlayerStats {
+  playerId: PlayerId;
+  gamesPlayed: number;
+  gamesWon: number;
+  tournamentsPlayed: number;
+  tournamentsWon: number;
+  currentStreak: number;
+  bestStreak: number;
+  fastestReactionMs: number;
+  totalPlaytimeSeconds: number;
+  gameWins: Record<string, number>;
+  gamePlays: Record<string, number>;
+}
+
+export interface Achievement {
+  id: string;
+  title: string;
+  titleAr: string;
+  description: string;
+  icon: string;
+  unlockedAt?: number | null; // timestamp or null
 }
 
 export interface AppSettings {

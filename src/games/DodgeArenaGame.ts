@@ -261,6 +261,7 @@ export class DodgeArenaGame extends BaseMiniGame {
 
   private render(): void {
     const ctx = this.ctx;
+    if (!ctx) return;
     const w = this.canvas.width;
     const h = this.canvas.height;
     const dpr = window.devicePixelRatio || 1;
