@@ -243,7 +243,15 @@ export class PartyApp {
     }
   }
 
+  private lastPartyConfig: PartyConfig = {
+    playerCount: 2,
+    totalRounds: 3,
+    mode: 'QUICK',
+    categories: ['REACTION', 'SPEED', 'COMPETITION', 'MEMORY']
+  };
+
   private startParty(config: PartyConfig): void {
+    this.lastPartyConfig = config;
     this.menuView.classList.add('hidden');
     this.gameArenaView.classList.remove('hidden');
     this.roundManager.startSession(config);
@@ -312,8 +320,26 @@ export class PartyApp {
   }
 
   private handleSessionComplete(leaderboard: { playerId: PlayerId; totalPoints: number; rank: number }[]): void {
-    this.modals.showGrandWinner(leaderboard, () => {
-      this.showMenu();
+    this.modals.showGrandWinner(leaderboard, action => {
+      if (action === 'PLAY_AGAIN') {
+        this.startParty(this.lastPartyConfig);
+      } else if (action === 'NEW_PARTY') {
+        this.showMenu();
+        this.modals.showPartySetup('CUSTOM', cfg => this.startParty(cfg));
+      } else if (action === 'GAME_LIBRARY') {
+        this.showMenu();
+        this.modals.showGameLibrary(gId => {
+          this.startParty({
+            playerCount: this.playerManager.getActiveCount(),
+            totalRounds: 1,
+            mode: 'SINGLE',
+            categories: [],
+            specificGameId: gId
+          });
+        });
+      } else {
+        this.showMenu();
+      }
     });
   }
 

@@ -5,6 +5,16 @@ import { RapidTapGame } from '../games/RapidTapGame.ts';
 import { TugOfWarGame } from '../games/TugOfWarGame.ts';
 import { PatternMemoryGame } from '../games/PatternMemoryGame.ts';
 import { CoinRushGame } from '../games/CoinRushGame.ts';
+import { ColorClashGame } from '../games/ColorClashGame.ts';
+import { BombPassGame } from '../games/BombPassGame.ts';
+import { MemoryMatchGame } from '../games/MemoryMatchGame.ts';
+import { PerfectTimingGame } from '../games/PerfectTimingGame.ts';
+import { DodgeArenaGame } from '../games/DodgeArenaGame.ts';
+import { QuickMathGame } from '../games/QuickMathGame.ts';
+import { TargetShootGame } from '../games/TargetShootGame.ts';
+import { ColorMemoryGame } from '../games/ColorMemoryGame.ts';
+import { BalanceGame } from '../games/BalanceGame.ts';
+import { FastestFingerGame } from '../games/FastestFingerGame.ts';
 
 type GameFactory = () => IMiniGame;
 
@@ -23,6 +33,16 @@ export class MiniGameManager {
     this.registerGame('tug-of-war', () => new TugOfWarGame());
     this.registerGame('pattern-memory', () => new PatternMemoryGame());
     this.registerGame('coin-rush', () => new CoinRushGame());
+    this.registerGame('color-clash', () => new ColorClashGame());
+    this.registerGame('bomb-pass', () => new BombPassGame());
+    this.registerGame('memory-match', () => new MemoryMatchGame());
+    this.registerGame('perfect-timing', () => new PerfectTimingGame());
+    this.registerGame('dodge-arena', () => new DodgeArenaGame());
+    this.registerGame('quick-math', () => new QuickMathGame());
+    this.registerGame('target-shoot', () => new TargetShootGame());
+    this.registerGame('color-memory', () => new ColorMemoryGame());
+    this.registerGame('balance', () => new BalanceGame());
+    this.registerGame('fastest-finger', () => new FastestFingerGame());
   }
 
   registerGame(id: string, factory: GameFactory): void {
@@ -45,13 +65,21 @@ export class MiniGameManager {
     this.playedGameIds.clear();
   }
 
-  pickNextGame(filterCategories?: string[], specificGameId?: string): GameMetadata {
+  pickNextGame(playerCount = 2, filterCategories?: string[], specificGameId?: string): GameMetadata {
     if (specificGameId && this.gameFactories.has(specificGameId)) {
       const meta = this.getMetadata(specificGameId);
       if (meta) return meta;
     }
 
     let available = this.getImplementedGames();
+    // Filter games by player count compatibility
+    const compatible = available.filter(
+      g => !g.supportedPlayers || g.supportedPlayers.includes(playerCount)
+    );
+    if (compatible.length > 0) {
+      available = compatible;
+    }
+
     if (filterCategories && filterCategories.length > 0) {
       const filtered = available.filter(g => filterCategories.includes(g.category));
       if (filtered.length > 0) available = filtered;

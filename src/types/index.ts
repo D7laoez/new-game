@@ -19,7 +19,7 @@ export interface Player {
   totalScore: number;
 }
 
-export type GameDifficulty = 'EASY' | 'MEDIUM' | 'HARD';
+export type GameDifficulty = 'EASY' | 'NORMAL' | 'MEDIUM' | 'HARD';
 
 export interface GameMetadata {
   id: string;
@@ -30,9 +30,11 @@ export interface GameMetadata {
   instructions: string;
   minPlayers: number;
   maxPlayers: number;
+  supportedPlayers: number[];
   durationSeconds: number;
   difficulty: GameDifficulty;
   icon: string;
+  controls?: string;
   implemented: boolean;
 }
 
@@ -46,6 +48,7 @@ export interface MiniGameContext {
   container: HTMLElement;
   players: Player[];
   activePlayerCount: number;
+  difficulty?: GameDifficulty;
   audio: IAudioManager;
   haptics: IHapticManager;
   onFinish: (result: MiniGameResult) => void;
@@ -77,6 +80,7 @@ export interface PartyConfig {
   totalRounds: number;
   mode: 'QUICK' | 'CUSTOM' | 'TOURNAMENT' | 'SINGLE';
   categories: GameCategory[];
+  difficulty?: GameDifficulty;
   specificGameId?: string;
 }
 

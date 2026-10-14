@@ -1,9 +1,22 @@
 import { PlayerManager } from '../services/PlayerManager.ts';
 import { MiniGameManager } from '../core/MiniGameManager.ts';
-import { IAudioManager, IHapticManager, PartyConfig, PlayerId, RoundResult, GameCategory } from '../types/index.ts';
+import { StorageService } from '../services/StorageService.ts';
+import {
+  IAudioManager,
+  IHapticManager,
+  PartyConfig,
+  PlayerId,
+  RoundResult,
+  GameCategory,
+  GameMetadata,
+  GameDifficulty
+} from '../types/index.ts';
 import confetti from 'canvas-confetti';
 
 export class ModalsManager {
+  private static FAVORITES_KEY = 'favorite_game_ids';
+  private static RECENT_KEY = 'recent_game_ids';
+
   constructor(
     private root: HTMLElement,
     private playerManager: PlayerManager,
@@ -11,6 +24,36 @@ export class ModalsManager {
     private audio: IAudioManager,
     private haptics: IHapticManager
   ) {}
+
+  private getFavorites(): string[] {
+    return StorageService.getItem<string[]>(ModalsManager.FAVORITES_KEY, []);
+  }
+
+  private toggleFavorite(id: string): boolean {
+    const favs = this.getFavorites();
+    const idx = favs.indexOf(id);
+    let isFav = false;
+    if (idx === -1) {
+      favs.push(id);
+      isFav = true;
+    } else {
+      favs.splice(idx, 1);
+      isFav = false;
+    }
+    StorageService.setItem(ModalsManager.FAVORITES_KEY, favs);
+    return isFav;
+  }
+
+  public recordRecentlyPlayed(id: string): void {
+    const recent = StorageService.getItem<string[]>(ModalsManager.RECENT_KEY, []);
+    const filtered = recent.filter(gId => gId !== id);
+    filtered.unshift(id);
+    StorageService.setItem(ModalsManager.RECENT_KEY, filtered.slice(0, 15));
+  }
+
+  private getRecentlyPlayed(): string[] {
+    return StorageService.getItem<string[]>(ModalsManager.RECENT_KEY, []);
+  }
 
   // --- PLAYER SETUP MODAL ---
   showPlayerSetup(onSave: (count: number) => void): void {
@@ -27,7 +70,7 @@ export class ModalsManager {
         </div>
 
         <div class="player-count-selector">
-          <label>How many players?</label>
+          <label>How many players on this device?</label>
           <div class="count-pill-group">
             ${[1, 2, 3, 4]
               .map(
@@ -168,6 +211,15 @@ export class ModalsManager {
         </div>
 
         <div class="setup-group">
+          <label>Game Difficulty</label>
+          <div class="count-pill-group" id="diff-pills">
+            <button class="count-pill" data-diff="EASY">EASY</button>
+            <button class="count-pill active" data-diff="NORMAL">NORMAL</button>
+            <button class="count-pill" data-diff="HARD">HARD</button>
+          </div>
+        </div>
+
+        <div class="setup-group">
           <label>Game Categories Included</label>
           <div class="cat-chip-group" id="cat-chips">
             ${['REACTION', 'SPEED', 'COMPETITION', 'MEMORY', 'PUZZLE', 'PARTY', 'DRAWING']
@@ -189,11 +241,22 @@ export class ModalsManager {
     this.root.appendChild(overlay);
 
     let selectedRounds = rounds;
+    let selectedDiff: GameDifficulty = 'NORMAL';
+
     overlay.querySelectorAll('#round-pills .count-pill').forEach(btn => {
       btn.addEventListener('click', () => {
         overlay.querySelectorAll('#round-pills .count-pill').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         selectedRounds = parseInt(btn.getAttribute('data-rounds') || '3', 10);
+        this.audio.playTap();
+      });
+    });
+
+    overlay.querySelectorAll('#diff-pills .count-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        overlay.querySelectorAll('#diff-pills .count-pill').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        selectedDiff = (btn.getAttribute('data-diff') || 'NORMAL') as GameDifficulty;
         this.audio.playTap();
       });
     });
@@ -224,14 +287,94 @@ export class ModalsManager {
         playerCount: this.playerManager.getActiveCount(),
         totalRounds: selectedRounds,
         mode: defaultMode,
+        difficulty: selectedDiff,
         categories: activeCats.length > 0 ? activeCats : ['REACTION', 'SPEED', 'COMPETITION', 'MEMORY']
       });
+    });
+  }
+
+  // --- GAME PREVIEW MODAL ---
+  showGamePreview(game: GameMetadata, onPlay: () => void): void {
+    const activePlayerCount = this.playerManager.getActiveCount();
+    const isCompatible = !game.supportedPlayers || game.supportedPlayers.includes(activePlayerCount);
+
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-backdrop';
+    overlay.innerHTML = `
+      <div class="modal-card modal-game-preview">
+        <div class="modal-header">
+          <span class="preview-cat-badge">${game.category}</span>
+          <button class="modal-close-btn" id="m-preview-close">&times;</button>
+        </div>
+
+        <div class="preview-hero">
+          <div class="preview-icon">${game.icon}</div>
+          <h2 class="preview-title">${game.title}</h2>
+          <h3 class="preview-title-ar">${game.titleAr}</h3>
+        </div>
+
+        <div class="preview-details-grid">
+          <div class="preview-pill">
+            <span class="pill-label">👥 Players</span>
+            <span class="pill-val">${game.minPlayers}–${game.maxPlayers} Players</span>
+          </div>
+          <div class="preview-pill">
+            <span class="pill-label">⏱️ Duration</span>
+            <span class="pill-val">~${game.durationSeconds}s</span>
+          </div>
+          <div class="preview-pill">
+            <span class="pill-label">⚡ Difficulty</span>
+            <span class="pill-val">${game.difficulty}</span>
+          </div>
+          <div class="preview-pill">
+            <span class="pill-label">🎮 Controls</span>
+            <span class="pill-val">${game.controls || 'Tap'}</span>
+          </div>
+        </div>
+
+        <div class="preview-description">
+          <p><strong>Overview:</strong> ${game.description}</p>
+          <p><strong>Instructions:</strong> ${game.instructions}</p>
+        </div>
+
+        ${
+          !isCompatible
+            ? `<div class="preview-warning">⚠️ This mini-game requires ${game.minPlayers}+ players (currently ${activePlayerCount} selected). Change player count to play.</div>`
+            : ''
+        }
+
+        <div class="modal-actions">
+          ${
+            game.implemented && isCompatible
+              ? `<button class="btn btn-primary btn-large" id="btn-preview-play">PLAY GAME 🎮</button>`
+              : `<button class="btn btn-primary btn-large disabled" disabled>${
+                  !game.implemented ? 'Available in Next Batch' : 'Incompatible Player Count'
+                }</button>`
+          }
+        </div>
+      </div>
+    `;
+
+    this.root.appendChild(overlay);
+
+    overlay.querySelector('#m-preview-close')?.addEventListener('click', () => {
+      this.audio.playTap();
+      overlay.remove();
+    });
+
+    overlay.querySelector('#btn-preview-play')?.addEventListener('click', () => {
+      this.recordRecentlyPlayed(game.id);
+      this.audio.playStart();
+      this.haptics.success();
+      overlay.remove();
+      onPlay();
     });
   }
 
   // --- GAME LIBRARY MODAL ---
   showGameLibrary(onPlayGame: (gameId: string) => void): void {
     const allGames = this.miniGameManager.getAllCatalogGames();
+    const activePlayerCount = this.playerManager.getActiveCount();
     const overlay = document.createElement('div');
     overlay.className = 'modal-backdrop';
 
@@ -248,13 +391,15 @@ export class ModalsManager {
 
         <div class="library-categories" id="lib-cat-filters">
           <button class="lib-cat-pill active" data-category="ALL">ALL</button>
-          <button class="lib-cat-pill" data-category="REACTION">REACTION (10)</button>
-          <button class="lib-cat-pill" data-category="SPEED">SPEED (7)</button>
-          <button class="lib-cat-pill" data-category="COMPETITION">COMPETITION (8)</button>
-          <button class="lib-cat-pill" data-category="MEMORY">MEMORY (8)</button>
-          <button class="lib-cat-pill" data-category="PUZZLE">PUZZLE (7)</button>
-          <button class="lib-cat-pill" data-category="PARTY">PARTY (10)</button>
-          <button class="lib-cat-pill" data-category="DRAWING">DRAWING (5)</button>
+          <button class="lib-cat-pill" data-category="FAVORITES">❤️ FAVORITES</button>
+          <button class="lib-cat-pill" data-category="RECENT">⏱️ RECENT</button>
+          <button class="lib-cat-pill" data-category="REACTION">REACTION</button>
+          <button class="lib-cat-pill" data-category="SPEED">SPEED</button>
+          <button class="lib-cat-pill" data-category="COMPETITION">COMPETITION</button>
+          <button class="lib-cat-pill" data-category="MEMORY">MEMORY</button>
+          <button class="lib-cat-pill" data-category="PUZZLE">PUZZLE</button>
+          <button class="lib-cat-pill" data-category="PARTY">PARTY</button>
+          <button class="lib-cat-pill" data-category="DRAWING">DRAWING</button>
         </div>
 
         <div class="library-grid" id="lib-grid"></div>
@@ -265,51 +410,100 @@ export class ModalsManager {
 
     const renderGrid = (query = '', cat = 'ALL') => {
       const grid = overlay.querySelector('#lib-grid')!;
+      const favorites = this.getFavorites();
+      const recentIds = this.getRecentlyPlayed();
+
       const filtered = allGames.filter(g => {
         const matchesQuery =
           g.title.toLowerCase().includes(query.toLowerCase()) ||
           g.titleAr.includes(query) ||
           g.description.toLowerCase().includes(query.toLowerCase());
-        const matchesCat = cat === 'ALL' || g.category === cat;
+
+        let matchesCat = true;
+        if (cat === 'FAVORITES') {
+          matchesCat = favorites.includes(g.id);
+        } else if (cat === 'RECENT') {
+          matchesCat = recentIds.includes(g.id);
+        } else if (cat !== 'ALL') {
+          matchesCat = g.category === cat;
+        }
+
         return matchesQuery && matchesCat;
       });
 
+      if (filtered.length === 0) {
+        grid.innerHTML = `<div class="lib-empty">No games found in this category.</div>`;
+        return;
+      }
+
       grid.innerHTML = filtered
-        .map(
-          g => `
-        <div class="game-catalog-card ${g.implemented ? 'playable' : 'coming-soon'}">
-          <div class="card-icon">${g.icon}</div>
-          <div class="card-body">
-            <div class="card-title-row">
-              <h3>${g.title}</h3>
-              <span class="card-badge ${g.implemented ? 'badge-live' : 'badge-soon'}">
-                ${g.implemented ? '▶ PLAY' : 'NEXT BATCH'}
-              </span>
+        .map(g => {
+          const isFav = favorites.includes(g.id);
+          const isCompatible = !g.supportedPlayers || g.supportedPlayers.includes(activePlayerCount);
+
+          return `
+          <div class="game-catalog-card ${g.implemented ? 'playable' : 'coming-soon'} ${!isCompatible ? 'incompatible' : ''}" data-id="${g.id}">
+            <div class="card-top-row">
+              <span class="card-icon">${g.icon}</span>
+              <button class="card-fav-btn ${isFav ? 'is-fav' : ''}" data-id="${g.id}">
+                ${isFav ? '❤️' : '🤍'}
+              </button>
             </div>
-            <div class="card-title-ar">${g.titleAr}</div>
-            <p class="card-desc">${g.description}</p>
-            <div class="card-meta">
-              <span>👥 ${g.minPlayers}-${g.maxPlayers}P</span>
-              <span>⏱️ ${g.durationSeconds}s</span>
-              <span class="difficulty-${g.difficulty.toLowerCase()}">${g.difficulty}</span>
+            <div class="card-body">
+              <div class="card-title-row">
+                <h3>${g.title}</h3>
+                <span class="card-badge ${g.implemented ? 'badge-live' : 'badge-soon'}">
+                  ${g.implemented ? '▶ PLAY' : 'SOON'}
+                </span>
+              </div>
+              <div class="card-title-ar">${g.titleAr}</div>
+              <p class="card-desc">${g.description}</p>
+              <div class="card-meta">
+                <span>👥 ${g.minPlayers}-${g.maxPlayers}P</span>
+                <span>⏱️ ${g.durationSeconds}s</span>
+                <span class="difficulty-${g.difficulty.toLowerCase()}">${g.difficulty}</span>
+              </div>
+              ${
+                !isCompatible
+                  ? `<div class="card-compat-tag">Needs ${g.minPlayers}+ Players</div>`
+                  : ''
+              }
             </div>
+            ${
+              g.implemented && isCompatible
+                ? `<button class="btn btn-primary play-single-btn" data-id="${g.id}">Preview / Play</button>`
+                : ''
+            }
           </div>
-          ${
-            g.implemented
-              ? `<button class="btn btn-primary play-single-btn" data-id="${g.id}">Play Now</button>`
-              : ''
-          }
-        </div>
-      `
-        )
+        `;
+        })
         .join('');
 
-      grid.querySelectorAll('.play-single-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
+      // Favorite toggle buttons
+      grid.querySelectorAll('.card-fav-btn').forEach(btn => {
+        btn.addEventListener('click', e => {
+          e.stopPropagation();
           const gId = btn.getAttribute('data-id')!;
-          this.audio.playStart();
-          overlay.remove();
-          onPlayGame(gId);
+          this.toggleFavorite(gId);
+          this.audio.playTap();
+          const activeCat = overlay.querySelector('.lib-cat-pill.active')?.getAttribute('data-category') || 'ALL';
+          const q = (overlay.querySelector('#lib-search') as HTMLInputElement).value;
+          renderGrid(q, activeCat);
+        });
+      });
+
+      // Card clicks open Preview Modal
+      grid.querySelectorAll('.game-catalog-card').forEach(card => {
+        card.addEventListener('click', () => {
+          const gId = card.getAttribute('data-id')!;
+          const gameMeta = this.miniGameManager.getMetadata(gId);
+          if (gameMeta) {
+            this.audio.playTap();
+            this.showGamePreview(gameMeta, () => {
+              overlay.remove();
+              onPlayGame(gId);
+            });
+          }
         });
       });
     };
@@ -389,10 +583,12 @@ export class ModalsManager {
     overlay.querySelector('#m-set-done')?.addEventListener('click', () => overlay.remove());
   }
 
-  // --- ROUND RESULTS OVERLAY ---
+  // --- ROUND RESULTS OVERLAY (WITH AUTO-PROCEED & LEADERBOARD DIFFERENCES) ---
   showRoundResults(result: RoundResult, onNext: () => void): void {
     const overlay = document.createElement('div');
     overlay.className = 'results-overlay';
+
+    const leaderScore = result.ranks[0]?.totalPoints || 0;
 
     overlay.innerHTML = `
       <div class="results-card">
@@ -403,6 +599,7 @@ export class ModalsManager {
           ${result.ranks
             .map(entry => {
               const p = this.playerManager.getPlayer(entry.playerId)!;
+              const diffToLeader = entry.rank === 1 ? 'LEADER 👑' : `-${leaderScore - entry.totalPoints} pts`;
               return `
               <div class="leaderboard-row rank-${entry.rank}" style="--p-color: ${p.color}">
                 <div class="row-rank">#${entry.rank}</div>
@@ -410,6 +607,7 @@ export class ModalsManager {
                   <span class="row-avatar">${p.avatar}</span>
                   <span class="row-name">${p.name}</span>
                 </div>
+                <div class="row-diff">${diffToLeader}</div>
                 <div class="row-round-pts">+${entry.roundPoints} pts</div>
                 <div class="row-total-pts">${entry.totalPoints} total</div>
               </div>
@@ -420,7 +618,7 @@ export class ModalsManager {
 
         <div class="results-actions">
           <button class="btn btn-primary btn-large" id="btn-next-round">
-            ${result.isFinalRound ? 'View Final Winner! 🏆' : 'Next Round ➡️'}
+            ${result.isFinalRound ? 'View Grand Winner! 🏆' : 'Continue ➡️'}
           </button>
         </div>
       </div>
@@ -430,15 +628,20 @@ export class ModalsManager {
     this.audio.playSuccess();
     this.haptics.success();
 
-    overlay.querySelector('#btn-next-round')?.addEventListener('click', () => {
+    const proceed = () => {
       this.audio.playTap();
       overlay.remove();
       onNext();
-    });
+    };
+
+    overlay.querySelector('#btn-next-round')?.addEventListener('click', proceed);
   }
 
-  // --- GRAND WINNER TOURNAMENT SCREEN ---
-  showGrandWinner(leaderboard: { playerId: PlayerId; totalPoints: number; rank: number }[], onReturnHome: () => void): void {
+  // --- GRAND WINNER TOURNAMENT SCREEN (WITH 4 QUICK ACTION BUTTONS) ---
+  showGrandWinner(
+    leaderboard: { playerId: PlayerId; totalPoints: number; rank: number }[],
+    onAction: (action: 'PLAY_AGAIN' | 'NEW_PARTY' | 'GAME_LIBRARY' | 'MAIN_MENU') => void
+  ): void {
     const overlay = document.createElement('div');
     overlay.className = 'winner-overlay';
 
@@ -468,8 +671,11 @@ export class ModalsManager {
             .join('')}
         </div>
 
-        <div class="winner-actions">
-          <button class="btn btn-primary btn-large" id="btn-winner-home">Back to Main Menu 🏠</button>
+        <div class="winner-actions-grid">
+          <button class="btn btn-primary" id="btn-w-play-again">🔄 Play Again</button>
+          <button class="btn btn-primary" id="btn-w-new-party">🎉 New Party</button>
+          <button class="btn btn-secondary" id="btn-w-library">📚 Game Library</button>
+          <button class="btn btn-secondary" id="btn-w-home">🏠 Main Menu</button>
         </div>
       </div>
     `;
@@ -478,33 +684,23 @@ export class ModalsManager {
     this.audio.playWinner();
     this.haptics.heavy();
 
-    // Trigger celebratory confetti explosions!
     try {
-      confetti({
-        particleCount: 100,
-        spread: 80,
-        origin: { y: 0.6 }
-      });
+      confetti({ particleCount: 120, spread: 90, origin: { y: 0.6 } });
       setTimeout(() => {
-        confetti({
-          particleCount: 80,
-          angle: 60,
-          spread: 60,
-          origin: { x: 0 }
-        });
-        confetti({
-          particleCount: 80,
-          angle: 120,
-          spread: 60,
-          origin: { x: 1 }
-        });
-      }, 400);
+        confetti({ particleCount: 80, angle: 60, spread: 60, origin: { x: 0 } });
+        confetti({ particleCount: 80, angle: 120, spread: 60, origin: { x: 1 } });
+      }, 350);
     } catch {}
 
-    overlay.querySelector('#btn-winner-home')?.addEventListener('click', () => {
+    const handleBtn = (act: 'PLAY_AGAIN' | 'NEW_PARTY' | 'GAME_LIBRARY' | 'MAIN_MENU') => {
       this.audio.playTap();
       overlay.remove();
-      onReturnHome();
-    });
+      onAction(act);
+    };
+
+    overlay.querySelector('#btn-w-play-again')?.addEventListener('click', () => handleBtn('PLAY_AGAIN'));
+    overlay.querySelector('#btn-w-new-party')?.addEventListener('click', () => handleBtn('NEW_PARTY'));
+    overlay.querySelector('#btn-w-library')?.addEventListener('click', () => handleBtn('GAME_LIBRARY'));
+    overlay.querySelector('#btn-w-home')?.addEventListener('click', () => handleBtn('MAIN_MENU'));
   }
 }

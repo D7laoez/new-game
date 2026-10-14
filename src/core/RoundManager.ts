@@ -57,6 +57,7 @@ export class RoundManager {
 
     this.currentRound++;
     this.currentGameMeta = this.miniGameManager.pickNextGame(
+      this.config.playerCount,
       this.config.categories,
       this.config.specificGameId
     );
@@ -85,6 +86,7 @@ export class RoundManager {
       container,
       players: this.playerManager.getActivePlayers(),
       activePlayerCount: this.playerManager.getActiveCount(),
+      difficulty: this.config.difficulty || 'NORMAL',
       audio: this.audio,
       haptics: this.haptics,
       onFinish: (result: MiniGameResult) => {
