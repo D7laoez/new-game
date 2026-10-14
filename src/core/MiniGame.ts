@@ -68,6 +68,45 @@ export abstract class BaseMiniGame implements IMiniGame {
     // Default finish if called directly
   }
 
+  protected activeTimeouts: Set<number> = new Set();
+  protected activeIntervals: Set<number> = new Set();
+
+  protected setGameTimeout(callback: () => void, ms: number): number {
+    const id = window.setTimeout(() => {
+      this.activeTimeouts.delete(id);
+      if (!this.isRunning && !this.isFinished) return;
+      callback();
+    }, ms);
+    this.activeTimeouts.add(id);
+    return id;
+  }
+
+  protected clearGameTimeout(id: number): void {
+    window.clearTimeout(id);
+    this.activeTimeouts.delete(id);
+  }
+
+  protected setGameInterval(callback: () => void, ms: number): number {
+    const id = window.setInterval(() => {
+      if (!this.isRunning || this.isFinished) return;
+      callback();
+    }, ms);
+    this.activeIntervals.add(id);
+    return id;
+  }
+
+  protected clearGameInterval(id: number): void {
+    window.clearInterval(id);
+    this.activeIntervals.delete(id);
+  }
+
+  protected clearAllTimers(): void {
+    this.activeTimeouts.forEach(id => window.clearTimeout(id));
+    this.activeTimeouts.clear();
+    this.activeIntervals.forEach(id => window.clearInterval(id));
+    this.activeIntervals.clear();
+  }
+
   protected onFinish(): void {
     // Optional hook
   }
@@ -79,6 +118,7 @@ export abstract class BaseMiniGame implements IMiniGame {
       cancelAnimationFrame(this.animFrameId);
       this.animFrameId = null;
     }
+    this.clearAllTimers();
     this.onDestroy();
     this.container.innerHTML = '';
   }

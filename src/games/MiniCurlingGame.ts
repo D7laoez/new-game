@@ -248,7 +248,8 @@ export class MiniCurlingGame extends BaseMiniGame {
 
     const allDone = this.context.players.every(p => (this.stonesThrownPerPlayer.get(p.id) || 0) >= this.maxRounds);
 
-    setTimeout(() => {
+    this.setGameTimeout(() => {
+      if (this.isFinished) return;
       if (allDone) {
         this.concludeGame();
       } else {

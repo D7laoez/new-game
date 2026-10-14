@@ -45,6 +45,16 @@ import { SafecrackerGame } from '../games/SafecrackerGame.ts';
 import { FishingFrenzyGame } from '../games/FishingFrenzyGame.ts';
 import { BridgeBuilderGame } from '../games/BridgeBuilderGame.ts';
 import { LightTrailDuelGame } from '../games/LightTrailDuelGame.ts';
+import { FindTheOddOneGame } from '../games/FindTheOddOneGame.ts';
+import { TerritoryBattleGame } from '../games/TerritoryBattleGame.ts';
+import { BalloonPumpGame } from '../games/BalloonPumpGame.ts';
+import { HigherOrLowerGame } from '../games/HigherOrLowerGame.ts';
+import { FindTheChangeGame } from '../games/FindTheChangeGame.ts';
+import { ConnectTheDotsGame } from '../games/ConnectTheDotsGame.ts';
+import { CopyTheShapeGame } from '../games/CopyTheShapeGame.ts';
+import { DiceBattleGame } from '../games/DiceBattleGame.ts';
+import { NumberPuzzleGame } from '../games/NumberPuzzleGame.ts';
+import { ColorLogicGame } from '../games/ColorLogicGame.ts';
 
 type GameFactory = () => IMiniGame;
 
@@ -103,6 +113,16 @@ export class MiniGameManager {
     this.registerGame('fishing-frenzy', () => new FishingFrenzyGame());
     this.registerGame('bridge-builder', () => new BridgeBuilderGame());
     this.registerGame('light-trail-duel', () => new LightTrailDuelGame());
+    this.registerGame('find-the-odd-one', () => new FindTheOddOneGame());
+    this.registerGame('territory-battle', () => new TerritoryBattleGame());
+    this.registerGame('balloon-pump', () => new BalloonPumpGame());
+    this.registerGame('higher-or-lower', () => new HigherOrLowerGame());
+    this.registerGame('find-the-change', () => new FindTheChangeGame());
+    this.registerGame('connect-the-dots', () => new ConnectTheDotsGame());
+    this.registerGame('copy-the-shape', () => new CopyTheShapeGame());
+    this.registerGame('dice-battle', () => new DiceBattleGame());
+    this.registerGame('number-puzzle', () => new NumberPuzzleGame());
+    this.registerGame('color-logic', () => new ColorLogicGame());
   }
 
   registerGame(id: string, factory: GameFactory): void {

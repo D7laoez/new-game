@@ -170,7 +170,7 @@ export class SafecrackerGame extends BaseMiniGame {
     );
 
     if (allDone) {
-      setTimeout(() => this.concludeGame(), 600);
+      this.setGameTimeout(() => this.concludeGame(), 600);
     }
   }
 

@@ -192,7 +192,7 @@ export class IceSlideGame extends BaseMiniGame {
 
       const allDone = this.context.players.every(p => this.playerReachedGoal.get(p.id));
       if (allDone) {
-        setTimeout(() => this.concludeGame(), 600);
+        this.setGameTimeout(() => this.concludeGame(), 600);
       }
     }
 

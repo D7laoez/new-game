@@ -6,8 +6,8 @@ A production-ready local multiplayer mini-game platform engineered for mobile ph
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![Vite](https://img.shields.io/badge/Vite-6.0-646CFF?logo=vite)](https://vitejs.dev/)
-[![Tests](https://img.shields.io/badge/Tests-79%20Passed-2ED573?logo=vitest)](https://vitest.dev/)
-[![Playable Games](https://img.shields.io/badge/Playable%20Games-45%20Ready-FFA502)](#)
+[![Tests](https://img.shields.io/badge/Tests-90%20Passed-2ED573?logo=vitest)](https://vitest.dev/)
+[![Playable Games](https://img.shields.io/badge/Playable%20Games-55%20Ready-FFA502)](#)
 [![Offline PWA](https://img.shields.io/badge/PWA%20Offline-100%25-FF4757)](#)
 
 ---
@@ -15,18 +15,19 @@ A production-ready local multiplayer mini-game platform engineered for mobile ph
 ## 🌟 Highlights
 
 - **Same-Device Multiplayer (1, 2, 3, or 4 Players):** Ergonomic screen partitioning for smartphone portrait and iPad/tablet landscape layouts.
-- **45 Genuinely Playable Mini-Games:** Spanning Reflex, Speed, Memory, Competition, Puzzle, Skill, Brain, Timing, and Party.
+- **55 Genuinely Playable Mini-Games:** Spanning Reflex, Speed, Memory, Competition, Puzzle, Skill, Brain, Timing, Drawing, and Party.
+- **80 Catalog Concept Designs:** 55 fully implemented + 25 planned roadmap concepts.
 - **Zero-Latency Procedural Audio:** Built-in Web Audio API synthesizer generates retro arcade tones, beeps, whooshes, buzzer alerts, and explosions completely offline without external audio files.
 - **Haptic Vibration:** Uses device vibration patterns on compatible touchscreens.
 - **Bilingual Interface (English & Arabic):** Full dynamic switching (`dir="rtl"`) with high-legibility typography.
 - **Progressive Web App (PWA):** Offline Service Worker caching (`/sw.js`) and web app manifest for home-screen installation.
-- **Extensible Architecture:** Designed as a scalable platform. Adding new mini-games requires only registering a new module implementing `IMiniGame`.
+- **Extensible Architecture:** Designed as a scalable platform. Adding new mini-games requires only registering a new module implementing `BaseMiniGame`.
 - **Tournament / Cup System:** Bronze (5R), Silver (7R), Gold (10R), Ultimate (15R), and Custom Party cups with live leaderboard, rank change indicators, and comeback alerts.
 - **Lifetime Statistics & Achievements:** Persistent stats (games played/won, streaks, fastest reaction times in ms) and 10 achievement badges with animated toast notifications.
 
 ---
 
-## 🕹️ 45 Fully Playable Mini-Games
+## 🕹️ 55 Fully Playable Mini-Games
 
 | # | Game | Category | Players | Description | Controls |
 | :- | :--- | :--- | :--- | :--- | :--- |
@@ -75,6 +76,16 @@ A production-ready local multiplayer mini-game platform engineered for mobile ph
 | **43** | **Fishing Frenzy** 🎣 | `TIMING` | 1–4 | Watch your bobber and reel in instantly when the fish strikes! | Reel In |
 | **44** | **Bridge Builder** 🌉 | `PUZZLE` | 1–4 | Place wooden planks across the river to connect both sides. | Plank Place |
 | **45** | **Light Trail Duel** ⚡ | `REFLEX` | 1–4 | Steer light cycles on a grid, leave glowing trails, and out-survive opponents. | Steer Arrows |
+| **46** | **Find The Odd One** 🔍 | `PUZZLE` | 1–4 | Spot the single symbol that differs from the rest across symbol pairs. | Tap Symbol |
+| **47** | **Territory Battle** 🗺️ | `COMPETITION` | 2–4 | Tap adjacent tiles to expand your territory across a shared grid. | Tap Grid |
+| **48** | **Balloon Pump** 🎈 | `COMPETITION` | 1–4 | Mash pump to inflate your balloon to 100% and trigger a victory pop! | Pump Mash |
+| **49** | **Higher Or Lower** 🃏 | `PARTY` | 1–4 | Predict whether the next drawn card will be higher or lower in rank. | High / Low |
+| **50** | **Find The Change** 👀 | `MEMORY` | 1–4 | Memorize items before the blink and spot which item shifted or swapped. | Choice Tap |
+| **51** | **Connect The Dots** ✏️ | `PUZZLE` | 1–4 | Connect numbered dots in ascending numerical order to reveal shapes. | Sequential Tap |
+| **52** | **Copy The Shape** 📐 | `DRAWING` | 1–4 | Toggle dots on a 3x3 matrix to match the displayed target pattern. | Grid Toggle |
+| **53** | **Dice Battle** 🎲 | `PARTY` | 1–4 | Roll dice with realistic physics to score Triples, Straights, and Pairs. | Roll & Lock |
+| **54** | **Number Puzzle** 🔢 | `PUZZLE` | 1–4 | Solve mathematical sequence patterns with missing values in split seconds. | Choice Buttons |
+| **55** | **Color Logic** 🎨 | `PUZZLE` | 1–4 | The Stroop effect challenge: tap the font ink color, not the deceptive word! | Color Pick |
 
 ---
 
@@ -83,12 +94,12 @@ A production-ready local multiplayer mini-game platform engineered for mobile ph
 ```
 src/
 ├── catalog/
-│   └── gameCatalog.ts       # 45 implemented mini-games + future roadmap
+│   └── gameCatalog.ts       # 55 implemented mini-games + 25 planned roadmap (80 total)
 ├── core/
-│   ├── MiniGame.ts          # BaseMiniGame abstract class & animation loop
+│   ├── MiniGame.ts          # BaseMiniGame abstract class, timer tracking & animation loop
 │   ├── MiniGameManager.ts   # Game registry, loader, compatibility & round picker
 │   └── RoundManager.ts      # Party, Cup Tournament, and Solo session flows
-├── games/                   # 45 self-contained mini-game modules
+├── games/                   # 55 self-contained mini-game modules
 ├── services/
 │   ├── AchievementManager.ts# 10 unlockable achievement badges
 │   ├── AudioManager.ts      # Web Audio procedural sound synthesizer
@@ -126,7 +137,7 @@ The server will start at: `http://localhost:3000/`
 ```bash
 npm test
 ```
-Runs 79 comprehensive tests covering all services, scoring algorithms, and all 45 mini-games.
+Runs 90 comprehensive tests covering all services, scoring algorithms, lifecycle safety, and all 55 mini-games.
 
 ### Production Build & Type-Check
 ```bash

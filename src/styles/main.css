@@ -5063,3 +5063,830 @@ body {
   cursor: pointer;
   touch-action: manipulation;
 }
+
+/* ==========================================
+   GAMES 46 TO 55 (PHASE 6)
+========================================== */
+
+/* Game 46: Find The Odd One */
+.find-the-odd-one-game {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.foo-hud {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 16px;
+  background: rgba(0, 0, 0, 0.4);
+}
+.foo-arena {
+  flex: 1;
+  display: grid;
+  gap: 12px;
+  padding: 12px;
+}
+.foo-player-zone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.04);
+  border: 2px solid var(--p-color);
+  border-radius: 14px;
+  padding: 10px;
+}
+.foo-zone-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-weight: 700;
+}
+.foo-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  width: 100%;
+  max-width: 280px;
+  aspect-ratio: 1;
+}
+.foo-cell {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  font-size: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: transform 0.1s ease, background 0.15s ease;
+  min-height: 48px;
+}
+.foo-cell:active {
+  transform: scale(0.92);
+}
+.foo-cell.correct {
+  background: #10b981;
+  transform: scale(1.1);
+}
+.foo-cell.wrong {
+  background: #ef4444;
+  animation: popRed 0.25s ease;
+}
+
+/* Game 47: Territory Battle */
+.territory-battle-game {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.tb-hud {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 16px;
+  background: rgba(0, 0, 0, 0.4);
+}
+.tb-scoreboard {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  padding: 8px;
+  flex-wrap: wrap;
+}
+.tb-score-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: var(--p-color);
+  color: #fff;
+  border-radius: 20px;
+  font-weight: 800;
+  font-size: 0.9rem;
+}
+.tb-board {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 6px;
+  padding: 12px;
+  margin: 0 auto;
+  max-width: 420px;
+  width: 100%;
+  aspect-ratio: 1;
+}
+.tb-tile {
+  background: var(--tile-color);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: transform 0.1s ease, background 0.2s ease;
+  min-height: 44px;
+}
+.tb-tile:active {
+  transform: scale(0.92);
+}
+.tb-tile.owned {
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Game 48: Balloon Pump */
+.balloon-pump-game {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.bp-hud {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 16px;
+  background: rgba(0, 0, 0, 0.4);
+}
+.bp-arena {
+  flex: 1;
+  display: grid;
+  gap: 12px;
+  padding: 12px;
+}
+.bp-player-zone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255, 255, 255, 0.04);
+  border: 2px solid var(--p-color);
+  border-radius: 16px;
+  padding: 12px;
+}
+.bp-zone-header {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  font-weight: 700;
+}
+.bp-balloon-stage {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 120px;
+}
+.bp-balloon {
+  width: 70px;
+  height: 85px;
+  border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  position: relative;
+  transition: transform 0.08s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+}
+.bp-knot {
+  font-size: 0.9rem;
+  margin-bottom: -10px;
+}
+.bp-balloon.popped {
+  background: transparent !important;
+  box-shadow: none;
+}
+.bp-boom {
+  font-size: 3.5rem;
+  animation: popScale 0.3s ease;
+}
+.bp-pump-btn {
+  width: 100%;
+  max-width: 240px;
+  padding: 14px;
+  background: var(--p-color);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-size: 1.2rem;
+  font-weight: 900;
+  cursor: pointer;
+  touch-action: manipulation;
+  min-height: 48px;
+}
+.bp-pump-btn:active:not(:disabled) {
+  transform: scale(0.94);
+}
+
+/* Game 49: Higher Or Lower */
+.higher-or-lower-game {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.hol-hud {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 16px;
+  background: rgba(0, 0, 0, 0.4);
+}
+.hol-arena {
+  flex: 1;
+  display: grid;
+  gap: 12px;
+  padding: 12px;
+}
+.hol-player-zone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255, 255, 255, 0.04);
+  border: 2px solid var(--p-color);
+  border-radius: 16px;
+  padding: 12px;
+}
+.hol-zone-header {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  font-weight: 700;
+}
+.hol-card-display {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.hol-card {
+  width: 90px;
+  height: 130px;
+  background: #ffffff;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+  transition: transform 0.15s ease;
+}
+.hol-card.red-suit {
+  color: #ef4444;
+}
+.hol-card.black-suit {
+  color: #1f2937;
+}
+.hol-card-val {
+  font-size: 2.2rem;
+  font-weight: 900;
+}
+.hol-card-suit {
+  font-size: 1.8rem;
+}
+.hol-btn-group {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  max-width: 240px;
+}
+.hol-btn {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 800;
+  color: #fff;
+  cursor: pointer;
+  touch-action: manipulation;
+  min-height: 48px;
+}
+.hol-btn.higher {
+  background: #10b981;
+}
+.hol-btn.lower {
+  background: #f59e0b;
+}
+
+/* Game 50: Find The Change */
+.find-the-change-game {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.ftc-hud {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 16px;
+  background: rgba(0, 0, 0, 0.4);
+}
+.ftc-arena {
+  flex: 1;
+  display: grid;
+  gap: 12px;
+  padding: 12px;
+}
+.ftc-player-zone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.04);
+  border: 2px solid var(--p-color);
+  border-radius: 16px;
+  padding: 12px;
+}
+.ftc-zone-header {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  font-weight: 700;
+}
+.ftc-status {
+  font-size: 0.95rem;
+  color: #f3f4f6;
+  margin: 6px 0;
+  font-weight: 600;
+}
+.ftc-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  width: 100%;
+  max-width: 280px;
+}
+.ftc-cell {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  font-size: 2.2rem;
+  height: 65px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  touch-action: manipulation;
+  min-height: 48px;
+}
+.ftc-cell.selectable:active {
+  transform: scale(0.92);
+}
+.ftc-cell.correct {
+  background: #10b981;
+}
+.ftc-cell.wrong {
+  background: #ef4444;
+}
+.ftc-cell.reveal {
+  border: 2px solid #ffd700;
+  background: rgba(255, 215, 0, 0.2);
+}
+
+/* Game 51: Connect The Dots */
+.connect-the-dots-game {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.ctd-hud {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 16px;
+  background: rgba(0, 0, 0, 0.4);
+}
+.ctd-arena {
+  flex: 1;
+  display: grid;
+  gap: 12px;
+  padding: 12px;
+}
+.ctd-player-zone {
+  display: flex;
+  flex-direction: column;
+  background: rgba(255, 255, 255, 0.04);
+  border: 2px solid var(--p-color);
+  border-radius: 16px;
+  padding: 12px;
+}
+.ctd-zone-header {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+.ctd-canvas-wrap {
+  flex: 1;
+  position: relative;
+  width: 100%;
+  min-height: 180px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 12px;
+}
+.ctd-svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  color: var(--p-color);
+}
+.ctd-dots-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+.ctd-dot {
+  position: absolute;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: #1f2937;
+  color: #fff;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  font-weight: 900;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+.ctd-dot.current {
+  border-color: #ffd700;
+  background: #f59e0b;
+  transform: translate(-50%, -50%) scale(1.15);
+  box-shadow: 0 0 10px #f59e0b;
+}
+.ctd-dot.connected {
+  background: var(--p-color);
+  border-color: #fff;
+}
+
+/* Game 52: Copy The Shape */
+.copy-the-shape-game {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.cts-hud {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 16px;
+  background: rgba(0, 0, 0, 0.4);
+}
+.cts-arena {
+  flex: 1;
+  display: grid;
+  gap: 12px;
+  padding: 12px;
+}
+.cts-player-zone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.04);
+  border: 2px solid var(--p-color);
+  border-radius: 16px;
+  padding: 12px;
+}
+.cts-zone-header {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+.cts-target-preview {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 6px 12px;
+  border-radius: 10px;
+  margin-bottom: 8px;
+}
+.cts-mini-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 3px;
+  width: 45px;
+  height: 45px;
+}
+.cts-mini-cell {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+.cts-mini-cell.active {
+  background: #ffd700;
+}
+.cts-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  width: 100%;
+  max-width: 220px;
+  margin-bottom: 10px;
+}
+.cts-cell {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  touch-action: manipulation;
+  min-height: 48px;
+}
+.cts-cell-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+.cts-cell.active .cts-cell-dot {
+  background: var(--p-color);
+  transform: scale(1.4);
+  box-shadow: 0 0 8px var(--p-color);
+}
+.cts-actions {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  max-width: 220px;
+}
+.cts-btn {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 800;
+  cursor: pointer;
+  touch-action: manipulation;
+  min-height: 48px;
+}
+.cts-btn.clear-btn {
+  background: #4b5563;
+  color: #fff;
+}
+.cts-btn.submit-btn {
+  background: var(--p-color);
+  color: #fff;
+}
+
+/* Game 53: Dice Battle */
+.dice-battle-game {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.db-hud {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 16px;
+  background: rgba(0, 0, 0, 0.4);
+}
+.db-arena {
+  flex: 1;
+  display: grid;
+  gap: 12px;
+  padding: 12px;
+}
+.db-player-zone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.04);
+  border: 2px solid var(--p-color);
+  border-radius: 16px;
+  padding: 12px;
+}
+.db-zone-header {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+.db-cup {
+  display: flex;
+  gap: 12px;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 14px;
+  margin: 6px 0;
+}
+.db-die {
+  font-size: 2.8rem;
+  background: #ffffff;
+  color: #111827;
+  width: 58px;
+  height: 58px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+  transition: transform 0.1s ease;
+}
+.db-cup.shaking .db-die {
+  animation: shakeDie 0.25s infinite ease-in-out;
+}
+@keyframes shakeDie {
+  0% { transform: translate(0, 0) rotate(0deg); }
+  25% { transform: translate(-3px, 3px) rotate(-8deg); }
+  50% { transform: translate(3px, -3px) rotate(8deg); }
+  75% { transform: translate(-2px, -2px) rotate(-4deg); }
+  100% { transform: translate(0, 0) rotate(0deg); }
+}
+.db-combo-label {
+  font-weight: 800;
+  color: #ffd700;
+  margin-bottom: 8px;
+  font-size: 1rem;
+}
+.db-actions {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+  max-width: 260px;
+}
+.db-roll-btn, .db-lock-btn {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 800;
+  color: #fff;
+  cursor: pointer;
+  touch-action: manipulation;
+  min-height: 48px;
+}
+.db-roll-btn {
+  background: var(--p-color);
+}
+.db-lock-btn {
+  background: #10b981;
+}
+
+/* Game 54: Number Puzzle */
+.number-puzzle-game {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.np-hud {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 16px;
+  background: rgba(0, 0, 0, 0.4);
+}
+.np-arena {
+  flex: 1;
+  display: grid;
+  gap: 12px;
+  padding: 12px;
+}
+.np-player-zone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.04);
+  border: 2px solid var(--p-color);
+  border-radius: 16px;
+  padding: 12px;
+}
+.np-zone-header {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+.np-sequence-box {
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+  padding: 10px 16px;
+  font-size: 1.25rem;
+  font-weight: 900;
+  color: #ffd700;
+  margin-bottom: 10px;
+  text-align: center;
+  letter-spacing: 1px;
+}
+.np-options-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  width: 100%;
+  max-width: 240px;
+}
+.np-opt-btn {
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  color: #fff;
+  font-size: 1.2rem;
+  font-weight: 800;
+  cursor: pointer;
+  touch-action: manipulation;
+  min-height: 48px;
+}
+.np-opt-btn:active {
+  transform: scale(0.94);
+}
+.np-opt-btn.correct {
+  background: #10b981;
+}
+.np-opt-btn.wrong {
+  background: #ef4444;
+}
+
+/* Game 55: Color Logic */
+.color-logic-game {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.cl-hud {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 16px;
+  background: rgba(0, 0, 0, 0.4);
+}
+.cl-arena {
+  flex: 1;
+  display: grid;
+  gap: 12px;
+  padding: 12px;
+}
+.cl-player-zone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.04);
+  border: 2px solid var(--p-color);
+  border-radius: 16px;
+  padding: 12px;
+}
+.cl-zone-header {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+.cl-word-box {
+  background: rgba(0, 0, 0, 0.35);
+  border-radius: 12px;
+  padding: 12px 24px;
+  font-size: 2.2rem;
+  font-weight: 900;
+  margin: 6px 0 12px 0;
+  letter-spacing: 2px;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+  transition: transform 0.1s ease;
+}
+.cl-buttons-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  width: 100%;
+  max-width: 240px;
+}
+.cl-btn {
+  padding: 12px;
+  background: var(--c-bg);
+  border: none;
+  border-radius: 10px;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 900;
+  cursor: pointer;
+  touch-action: manipulation;
+  min-height: 48px;
+}
+.cl-btn:active {
+  transform: scale(0.92);
+}
+

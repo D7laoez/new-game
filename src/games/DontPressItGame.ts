@@ -201,7 +201,7 @@ export class DontPressItGame extends BaseMiniGame {
 
   private concludeGame(): void {
     if (this.isFinished) return;
-    this.clearAllTimers();
+    this.clearRoundTimers();
 
     const players = this.context.players;
     const sorted = [...players].sort(
@@ -220,12 +220,12 @@ export class DontPressItGame extends BaseMiniGame {
     });
   }
 
-  private clearAllTimers(): void {
+  private clearRoundTimers(): void {
     this.roundTimeoutIds.forEach(id => clearTimeout(id));
     this.roundTimeoutIds = [];
   }
 
   protected onDestroy(): void {
-    this.clearAllTimers();
+    this.clearRoundTimers();
   }
 }

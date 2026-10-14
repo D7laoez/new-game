@@ -171,7 +171,7 @@ export class BridgeBuilderGame extends BaseMiniGame {
 
       const allDone = this.context.players.every(p => this.playerCompleted.get(p.id));
       if (allDone) {
-        setTimeout(() => this.concludeGame(), 600);
+        this.setGameTimeout(() => this.concludeGame(), 600);
       }
     }
 

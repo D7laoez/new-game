@@ -783,7 +783,7 @@ export const GAME_CATALOG: GameMetadata[] = [
     difficulty: 'NORMAL',
     icon: '🔍',
     controls: 'Tap',
-    implemented: false
+    implemented: true
   },
   {
     id: 'tap-challenge',
@@ -879,7 +879,7 @@ export const GAME_CATALOG: GameMetadata[] = [
     difficulty: 'NORMAL',
     icon: '🗺️',
     controls: 'Tap Grid',
-    implemented: false
+    implemented: true
   },
   {
     id: 'king-of-the-hill',
@@ -911,7 +911,7 @@ export const GAME_CATALOG: GameMetadata[] = [
     difficulty: 'EASY',
     icon: '🎈',
     controls: 'Pump Mash',
-    implemented: false
+    implemented: true
   },
   {
     id: 'arena-survivor',
@@ -975,7 +975,7 @@ export const GAME_CATALOG: GameMetadata[] = [
     difficulty: 'NORMAL',
     icon: '🧩',
     controls: 'Choice Buttons',
-    implemented: false
+    implemented: true
   },
   {
     id: 'shape-puzzle',
@@ -1007,7 +1007,7 @@ export const GAME_CATALOG: GameMetadata[] = [
     difficulty: 'EASY',
     icon: '👀',
     controls: 'Tap Symbol',
-    implemented: false
+    implemented: true
   },
   {
     id: 'connect-the-dots',
@@ -1023,7 +1023,7 @@ export const GAME_CATALOG: GameMetadata[] = [
     difficulty: 'NORMAL',
     icon: '✏️',
     controls: 'Drag Trace',
-    implemented: false
+    implemented: true
   },
   {
     id: 'quick-calculation',
@@ -1071,7 +1071,7 @@ export const GAME_CATALOG: GameMetadata[] = [
     difficulty: 'HARD',
     icon: '🎭',
     controls: 'Color Pick',
-    implemented: false
+    implemented: true
   },
   {
     id: 'hot-potato',
@@ -1183,7 +1183,7 @@ export const GAME_CATALOG: GameMetadata[] = [
     difficulty: 'EASY',
     icon: '🎲',
     controls: 'Roll Shake',
-    implemented: false
+    implemented: true
   },
   {
     id: 'higher-or-lower',
@@ -1199,7 +1199,7 @@ export const GAME_CATALOG: GameMetadata[] = [
     difficulty: 'EASY',
     icon: '📈',
     controls: 'High / Low',
-    implemented: false
+    implemented: true
   },
   {
     id: 'treasure-hunt',
@@ -1247,7 +1247,7 @@ export const GAME_CATALOG: GameMetadata[] = [
     difficulty: 'NORMAL',
     icon: '⭕',
     controls: 'Trace Shape',
-    implemented: false
+    implemented: true
   },
   {
     id: 'complete-the-drawing',

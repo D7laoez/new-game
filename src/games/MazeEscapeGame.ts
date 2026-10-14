@@ -176,7 +176,7 @@ export class MazeEscapeGame extends BaseMiniGame {
       // If all escaped
       const allEscaped = this.context.players.every(p => this.playerEscaped.get(p.id));
       if (allEscaped) {
-        setTimeout(() => this.concludeGame(), 500);
+        this.setGameTimeout(() => this.concludeGame(), 500);
       }
     }
 

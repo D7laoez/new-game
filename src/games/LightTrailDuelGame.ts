@@ -197,13 +197,13 @@ export class LightTrailDuelGame extends BaseMiniGame {
       this.survivalOrder.forEach((pId, idx) => {
         this.playerScores[pId] = idx + 2;
       });
-      setTimeout(() => this.concludeGame(), 500);
+      this.setGameTimeout(() => this.concludeGame(), 500);
     } else if (stillAlive.length === 0) {
       // Tie crash
       this.survivalOrder.forEach((pId, idx) => {
         this.playerScores[pId] = idx + 2;
       });
-      setTimeout(() => this.concludeGame(), 500);
+      this.setGameTimeout(() => this.concludeGame(), 500);
     }
   }
 
