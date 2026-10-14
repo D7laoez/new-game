@@ -35,6 +35,16 @@ import { WordScrambleGame } from '../games/WordScrambleGame.ts';
 import { CatchTheFruitGame } from '../games/CatchTheFruitGame.ts';
 import { SumSprintGame } from '../games/SumSprintGame.ts';
 import { PerfectLandingGame } from '../games/PerfectLandingGame.ts';
+import { MazeEscapeGame } from '../games/MazeEscapeGame.ts';
+import { PaperPlaneFlightGame } from '../games/PaperPlaneFlightGame.ts';
+import { ShapeSortFactoryGame } from '../games/ShapeSortFactoryGame.ts';
+import { IceSlideGame } from '../games/IceSlideGame.ts';
+import { MiniCurlingGame } from '../games/MiniCurlingGame.ts';
+import { WordChainGame } from '../games/WordChainGame.ts';
+import { SafecrackerGame } from '../games/SafecrackerGame.ts';
+import { FishingFrenzyGame } from '../games/FishingFrenzyGame.ts';
+import { BridgeBuilderGame } from '../games/BridgeBuilderGame.ts';
+import { LightTrailDuelGame } from '../games/LightTrailDuelGame.ts';
 
 type GameFactory = () => IMiniGame;
 
@@ -83,6 +93,16 @@ export class MiniGameManager {
     this.registerGame('catch-the-fruit', () => new CatchTheFruitGame());
     this.registerGame('sum-sprint', () => new SumSprintGame());
     this.registerGame('perfect-landing', () => new PerfectLandingGame());
+    this.registerGame('maze-escape', () => new MazeEscapeGame());
+    this.registerGame('paper-plane-flight', () => new PaperPlaneFlightGame());
+    this.registerGame('shape-sort-factory', () => new ShapeSortFactoryGame());
+    this.registerGame('ice-slide', () => new IceSlideGame());
+    this.registerGame('mini-curling', () => new MiniCurlingGame());
+    this.registerGame('word-chain', () => new WordChainGame());
+    this.registerGame('safecracker', () => new SafecrackerGame());
+    this.registerGame('fishing-frenzy', () => new FishingFrenzyGame());
+    this.registerGame('bridge-builder', () => new BridgeBuilderGame());
+    this.registerGame('light-trail-duel', () => new LightTrailDuelGame());
   }
 
   registerGame(id: string, factory: GameFactory): void {
