@@ -264,13 +264,17 @@ export class PartyApp {
     this.appRoot.querySelector('#btn-player-pill')?.addEventListener('click', openPlayers);
     this.appRoot.querySelector('#btn-mode-players')?.addEventListener('click', openPlayers);
 
-    // Audio toggle
-    let isMuted = false;
+    // Audio toggle — persist
+    let isMuted = StorageService.getItem<boolean>('app_muted', false);
+    this.audioManager.toggleMute(!isMuted);
     const audioBtn = this.appRoot.querySelector('#btn-audio-toggle') as HTMLElement;
+    if (audioBtn) audioBtn.textContent = isMuted ? '🔇' : '🔊';
     audioBtn?.addEventListener('click', () => {
       isMuted = !isMuted;
       this.audioManager.toggleMute(!isMuted);
+      StorageService.setItem('app_muted', isMuted);
       audioBtn.textContent = isMuted ? '🔇' : '🔊';
+      this.hapticManager.light();
     });
 
     // Settings
@@ -279,6 +283,7 @@ export class PartyApp {
       this.modals.showSettings(isMuted, muted => {
         isMuted = muted;
         this.audioManager.toggleMute(!isMuted);
+        StorageService.setItem('app_muted', isMuted);
         if (audioBtn) audioBtn.textContent = isMuted ? '🔇' : '🔊';
       });
     });
@@ -286,7 +291,6 @@ export class PartyApp {
     // Abort game
     this.appRoot.querySelector('#btn-abort-game')?.addEventListener('click', () => {
       if (confirm(this.t.quitConfirm)) {
-        this.roundManager.endSession();
         this.showMenu();
       }
     });
@@ -332,16 +336,21 @@ export class PartyApp {
   private handleSessionState(state: SessionState, data?: unknown): void {
     const roundTag = this.appRoot.querySelector('#arena-round-tag');
     if (roundTag) {
-      roundTag.textContent = this.t.roundIndicator(
-        this.roundManager.getCurrentRound(),
-        this.roundManager.getTotalRounds()
-      );
+      try {
+        roundTag.textContent = this.t.roundIndicator(
+          this.roundManager.getCurrentRound(),
+          this.roundManager.getTotalRounds()
+        );
+      } catch {}
     }
 
     if (state === 'INTRO') {
       const introData = data as { roundNumber: number; totalRounds: number; game: GameMetadata };
-      this.showIntroOverlay(introData.game);
+      if (introData?.game) this.showIntroOverlay(introData.game);
     } else if (state === 'PLAYING') {
+      this.introOverlay.classList.add('hidden');
+    } else if (state === 'IDLE') {
+      this.clearIntroTimer();
       this.introOverlay.classList.add('hidden');
     }
   }
@@ -376,23 +385,23 @@ export class PartyApp {
     let count = 3;
 
     // 3, 2, 1, GO!
-    const timer = setInterval(() => {
+    this.introTimer = window.setInterval(() => {
       if (count > 0) {
         countdownNum.textContent = count.toString();
         this.audioManager.playCountdown(count);
         this.hapticManager.medium();
         count--;
       } else {
-        clearInterval(timer);
+        this.clearIntroTimer();
         countdownNum.textContent = 'GO!';
         countdownNum.classList.add('go');
         this.audioManager.playCountdown(0);
         this.hapticManager.heavy();
 
-        setTimeout(() => {
+        window.setTimeout(() => {
           this.introOverlay.classList.add('hidden');
           const viewport = this.appRoot.querySelector('#game-viewport') as HTMLElement;
-          this.roundManager.launchGame(viewport);
+          if (viewport) this.roundManager.launchGame(viewport);
         }, 500);
       }
     }, 900);
@@ -429,6 +438,9 @@ export class PartyApp {
   }
 
   private showMenu(): void {
+    this.clearIntroTimer();
+    this.introOverlay.classList.add('hidden');
+    this.roundManager.endSession();
     this.gameArenaView.classList.add('hidden');
     this.menuView.classList.remove('hidden');
     this.updatePlayersStrip();

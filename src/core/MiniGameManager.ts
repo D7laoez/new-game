@@ -180,7 +180,7 @@ export class MiniGameManager {
 
   loadGame(gameId: string, context: MiniGameContext): IMiniGame {
     if (this.currentGame) {
-      this.currentGame.destroy();
+      try { this.currentGame.destroy(); } catch (e) { console.warn('destroy failed', e); }
       this.currentGame = null;
     }
 
@@ -189,8 +189,30 @@ export class MiniGameManager {
       throw new Error(`Game with id "${gameId}" is not implemented yet.`);
     }
 
-    this.currentGame = factory();
-    this.currentGame.initialize(context);
+    try {
+      this.currentGame = factory();
+      this.currentGame.initialize(context);
+    } catch (e) {
+      console.error(`Failed to initialize game ${gameId}:`, e);
+      // Fallback placeholder to avoid crash
+      const container = context.container;
+      container.innerHTML = `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:12px;padding:24px;text-align:center"><div style="font-size:2rem">⚠️</div><p>Failed to load "${gameId}". Tap to skip.</p><button style="padding:12px 24px;border-radius:12px;border:none;background:#6366f1;color:#fff;font-weight:800;cursor:pointer" id="skip-broken-game">Skip →</button></div>`;
+      const fallback: IMiniGame = {
+        metadata: this.getMetadata(gameId)!,
+        initialize() {},
+        start() {
+          const btn = container.querySelector('#skip-broken-game');
+          btn?.addEventListener('click', () => context.onFinish({ scores: { 1:0,2:0,3:0,4:0 } as never, winnerId: null }));
+          // Auto-skip after 2.5s
+          setTimeout(() => context.onFinish({ scores: { 1:0,2:0,3:0,4:0 } as never, winnerId: null }), 2500);
+        },
+        update() {},
+        handleInput() {},
+        finish() {},
+        destroy() { container.innerHTML = ''; }
+      };
+      this.currentGame = fallback;
+    }
     return this.currentGame;
   }
 

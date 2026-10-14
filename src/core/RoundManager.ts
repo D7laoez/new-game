@@ -84,6 +84,7 @@ export class RoundManager {
 
   launchGame(container: HTMLElement): void {
     if (!this.currentGameMeta) return;
+    if (!container) return;
 
     this.setState('PLAYING');
 
@@ -95,13 +96,16 @@ export class RoundManager {
       audio: this.audio,
       haptics: this.haptics,
       onFinish: (result: MiniGameResult) => {
-        this.handleGameFinished(result);
+        try { this.handleGameFinished(result); } catch (e) { console.error('handleGameFinished failed', e); }
       }
     });
 
     const activeGame = this.miniGameManager.getCurrentGame();
     if (activeGame) {
-      activeGame.start();
+      try { activeGame.start(); } catch (e) {
+        console.error('activeGame.start failed', e);
+        this.handleGameFinished({ scores: { 1:0,2:0,3:0,4:0 } as never, winnerId: null });
+      }
     }
   }
 

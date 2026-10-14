@@ -568,6 +568,10 @@ export class ModalsManager {
             <span>Display Orientation</span>
             <span class="settings-val">Landscape & Portrait Adaptive</span>
           </div>
+          <div class="settings-row">
+            <span>Reset All Progress</span>
+            <button class="btn btn-secondary" id="btn-reset-all">Reset 🗑️</button>
+          </div>
         </div>
 
         <div class="modal-actions">
@@ -589,6 +593,14 @@ export class ModalsManager {
 
     overlay.querySelector('#m-set-close')?.addEventListener('click', () => overlay.remove());
     overlay.querySelector('#m-set-done')?.addEventListener('click', () => overlay.remove());
+    overlay.querySelector('#btn-reset-all')?.addEventListener('click', () => {
+      if (confirm('Reset all stats, achievements and favorites? This cannot be undone.')) {
+        StorageService.clearAll();
+        this.audio.playTap();
+        alert('Cleared! Reloading...');
+        location.reload();
+      }
+    });
   }
 
   // --- TOURNAMENT / CUP SELECTION MODAL ---
