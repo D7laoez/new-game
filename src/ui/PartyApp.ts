@@ -8,6 +8,7 @@ import { MiniGameManager } from '../core/MiniGameManager.ts';
 import { RoundManager, SessionState } from '../core/RoundManager.ts';
 import { ModalsManager } from './Modals.ts';
 import { StorageService } from '../services/StorageService.ts';
+import { GameHistoryService } from '../services/GameHistoryService.ts';
 import { Language, i18nDict, Translations } from '../services/I18nService.ts';
 import { PartyConfig, GameMetadata, RoundResult, PlayerId } from '../types/index.ts';
 
@@ -18,6 +19,7 @@ export class PartyApp {
   private hapticManager: HapticManager;
   private statsService: StatsService;
   private achievementManager: AchievementManager;
+  private historyService: GameHistoryService;
   private miniGameManager: MiniGameManager;
   private roundManager: RoundManager;
   private modals: ModalsManager;
@@ -29,6 +31,7 @@ export class PartyApp {
   private introTimer: number | null = null;
 
   private currentLang: Language = 'en';
+  private pendingRounds: RoundResult[] = [];
 
   constructor(root: HTMLElement) {
     this.appRoot = root;
@@ -41,6 +44,7 @@ export class PartyApp {
     this.hapticManager = new HapticManager(true);
     this.statsService = new StatsService();
     this.achievementManager = new AchievementManager(this.statsService);
+    this.historyService = new GameHistoryService();
     this.miniGameManager = new MiniGameManager();
 
     this.modals = new ModalsManager(
@@ -51,7 +55,8 @@ export class PartyApp {
       this.hapticManager,
       this.scoreManager,
       this.statsService,
-      this.achievementManager
+      this.achievementManager,
+      this.historyService
     );
 
     // Achievement unlock listener
@@ -120,6 +125,7 @@ export class PartyApp {
                 <span id="player-count-label">👥 2 Players</span>
               </button>
               <button class="icon-btn" id="btn-stats" title="${t.statistics}">📊</button>
+              <button class="icon-btn" id="btn-history" title="History & Share">🕘</button>
               <button class="icon-btn" id="btn-achievements" title="${t.achievements}">🏅</button>
               <button class="icon-btn" id="btn-audio-toggle" title="Toggle Sound">🔊</button>
               <button class="icon-btn" id="btn-settings" title="${t.settings}">⚙️</button>
@@ -229,6 +235,10 @@ export class PartyApp {
     });
 
     // Achievements
+    this.appRoot.querySelector('#btn-history')?.addEventListener('click', () => {
+      this.audioManager.playTap();
+      this.modals.showHistory();
+    });
     this.appRoot.querySelector('#btn-achievements')?.addEventListener('click', () => {
       this.audioManager.playTap();
       this.modals.showAchievements();
@@ -328,6 +338,7 @@ export class PartyApp {
 
   private startParty(config: PartyConfig): void {
     this.lastPartyConfig = config;
+    this.pendingRounds = [];
     this.menuView.classList.add('hidden');
     this.gameArenaView.classList.remove('hidden');
     this.roundManager.startSession(config);
@@ -408,12 +419,17 @@ export class PartyApp {
   }
 
   private handleRoundComplete(result: RoundResult): void {
+    this.pendingRounds.push(result);
     this.modals.showRoundResults(result, () => {
       this.roundManager.nextRound();
     });
   }
 
   private handleSessionComplete(leaderboard: { playerId: PlayerId; totalPoints: number; rank: number }[]): void {
+    try {
+      const winner = leaderboard.length > 1 && leaderboard[0].totalPoints === leaderboard[1].totalPoints ? 'TIE' as const : leaderboard[0]?.playerId ?? ('TIE' as const);
+      this.historyService.recordSession(this.lastPartyConfig, this.pendingRounds, leaderboard as any, winner as any);
+    } catch {}
     this.modals.showGrandWinner(leaderboard, action => {
       if (action === 'PLAY_AGAIN') {
         this.startParty(this.lastPartyConfig);

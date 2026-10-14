@@ -42,8 +42,16 @@ export class AudioManager implements IAudioManager {
     this.enabled = enabled;
   }
 
+  isEnabled(): boolean {
+    return this.enabled;
+  }
+
   setVolume(vol: number): void {
     this.volume = Math.max(0, Math.min(1, vol));
+  }
+
+  getVolume(): number {
+    return this.volume;
   }
 
   playTone(freq: number, duration = 0.1, type: OscillatorType = 'sine'): void {
@@ -95,22 +103,28 @@ export class AudioManager implements IAudioManager {
     } catch {}
   }
 
+  playTick(): void {
+    if (!this.enabled) return;
+    this.playTone(900, 0.05, 'sine');
+  }
+
   playCountdown(count: number): void {
     if (count > 0) {
-      this.playTone(480, 0.12, 'square');
+      this.playTone(480 + count * 40, 0.12, 'square');
     } else {
-      // GO!
       this.playTone(880, 0.25, 'triangle');
+      setTimeout(() => this.playTone(1100, 0.15, 'triangle'), 80);
     }
   }
 
   playStart(): void {
     this.playTone(660, 0.15, 'triangle');
+    setTimeout(() => this.playTone(880, 0.1, 'triangle'), 100);
   }
 
   playSuccess(): void {
     if (!this.enabled) return;
-    const notes = [523.25, 659.25, 783.99, 1046.5]; // C5, E5, G5, C6
+    const notes = [523.25, 659.25, 783.99, 1046.5];
     notes.forEach((freq, idx) => {
       setTimeout(() => this.playTone(freq, 0.12, 'sine'), idx * 60);
     });
@@ -119,6 +133,7 @@ export class AudioManager implements IAudioManager {
   playError(): void {
     if (!this.enabled) return;
     this.playTone(180, 0.22, 'sawtooth');
+    setTimeout(() => this.playTone(140, 0.18, 'sawtooth'), 120);
   }
 
   playScore(): void {
@@ -237,5 +252,17 @@ export class AudioManager implements IAudioManager {
     if (!this.enabled) return;
     this.playTone(130, 0.12, 'sawtooth');
     setTimeout(() => this.playTone(130, 0.12, 'sawtooth'), 150);
+  }
+
+  playCoin(): void {
+    if (!this.enabled) return;
+    this.playTone(1200, 0.08, 'sine');
+    setTimeout(() => this.playTone(1600, 0.08, 'sine'), 60);
+  }
+
+  playWarning(): void {
+    if (!this.enabled) return;
+    this.playTone(300, 0.15, 'square');
+    setTimeout(() => this.playTone(250, 0.15, 'square'), 180);
   }
 }

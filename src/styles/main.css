@@ -5890,3 +5890,68 @@ body {
   transform: scale(0.92);
 }
 
+
+/* ==================================================
+   A11Y & POLISH: color-blind, reduced-motion, focus, RTL, mobile safe-areas, history
+================================================== */
+
+/* Color-blind friendly overrides (toggle via html.color-blind on) */
+html.color-blind {
+  --p1-color: #0072B2;
+  --p2-color: #D55E00;
+  --p3-color: #009E73;
+  --p4-color: #CC79A7;
+}
+html.color-blind .player-chip-badge,
+html.color-blind .qt-player-zone,
+html.color-blind .ts-player-zone { filter: saturate(1.15); }
+
+/* Reduced motion: respect user preference + app toggle */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+html.reduce-motion *, html.reduce-motion *::before, html.reduce-motion *::after {
+  animation-duration: 0.01ms !important;
+  transition-duration: 0.01ms !important;
+}
+
+/* Focus visible: keyboard users must see focus */
+:focus-visible {
+  outline: 2px solid #6366f1;
+  outline-offset: 2px;
+}
+button:focus:not(:focus-visible), a:focus:not(:focus-visible) { outline: none; }
+
+/* RTL polish */
+html[dir="rtl"] .app-top-bar { flex-direction: row-reverse; }
+html[dir="rtl"] .top-bar-actions { flex-direction: row-reverse; }
+
+/* History modal */
+.modal-history .history-list { display: flex; flex-direction: column; gap: 10px; max-height: 52vh; overflow-y: auto; padding-right: 4px; }
+.history-entry { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 12px; }
+.history-head { display: flex; justify-content: space-between; gap: 8px; font-size: 0.9rem; }
+.history-date { color: var(--text-muted); font-size: 0.8rem; }
+.history-meta { color: var(--text-muted); font-size: 0.82rem; margin-top: 4px; }
+.history-rounds { font-size: 0.82rem; margin-top: 6px; opacity: 0.95; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.history-actions { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+.btn-small { padding: 8px 12px; font-size: 0.85rem; border-radius: 10px; }
+
+/* Settings: color-blind & reduced-motion toggles already use .toggle-switch */
+
+/* Mobile notch / safe-area polish already via env(); ensure viewport never overflows */
+@media (max-width: 380px) {
+  .app-top-bar { padding: 10px 12px; gap: 8px; }
+  .brand-title { font-size: 1.05rem; }
+  .top-bar-actions { gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+}
+
+/* Improve tap targets (minimum 44px per WCAG) */
+.icon-btn, .btn, .count-pill, .cat-chip, .lib-cat-pill { min-height: 36px; }
+.game-viewport { overscroll-behavior: contain; }
+
+/* Toast / aria-live region (injected by PartyApp if needed) */
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }

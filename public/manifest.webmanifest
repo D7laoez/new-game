@@ -1,18 +1,35 @@
 {
   "name": "Party Game Collection - 1-4 Players",
   "short_name": "PartyGames",
-  "description": "50+ fast, fun local multiplayer mini-games for 1, 2, 3 or 4 players on the same screen and device.",
+  "description": "55 fast, fun local multiplayer mini-games for 1, 2, 3 or 4 players on the same screen and device. Offline-ready.",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "orientation": "any",
   "background_color": "#0a0c16",
-  "theme_color": "#6366f1",
+  "theme_color": "#0a0c16",
+  "categories": ["games", "entertainment"],
+  "lang": "en",
+  "dir": "ltr",
   "icons": [
     {
       "src": "icon.svg",
       "sizes": "192x192 512x512",
       "type": "image/svg+xml",
       "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Quick Party (3 rounds)",
+      "url": "/?quick=1",
+      "description": "Jump straight into a 3-round quick party"
+    },
+    {
+      "name": "Game Library",
+      "url": "/?library=1",
+      "description": "Browse all 55 mini-games"
     }
   ]
 }

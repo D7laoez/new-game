@@ -127,16 +127,30 @@ export interface Achievement {
   unlockedAt?: number | null; // timestamp or null
 }
 
+export interface GameHistoryEntry {
+  id: string; // unique timestamp-based id
+  date: number; // Date.now()
+  mode: PartyConfig['mode'];
+  tournamentCup?: TournamentCup;
+  playerCount: number;
+  totalRounds: number;
+  rounds: { gameId: string; title: string; icon: string; winnerIds: PlayerId[]; scores: Record<PlayerId, number> }[];
+  finalLeaderboard: { playerId: PlayerId; totalPoints: number; rank: number }[];
+  winnerId: PlayerId | 'TIE';
+}
+
 export interface AppSettings {
   soundEnabled: boolean;
   musicEnabled: boolean;
   hapticsEnabled: boolean;
   reducedMotion: boolean;
   volume: number;
+  colorBlindMode: boolean;
 }
 
 export interface IAudioManager {
   playTap(): void;
+  playTick(): void;
   playCountdown(count: number): void;
   playStart(): void;
   playSuccess(): void;
@@ -148,8 +162,13 @@ export interface IAudioManager {
   playExplosion(): void;
   playWhoosh(): void;
   playBuzzer(): void;
+  playCoin(): void;
+  playWarning(): void;
   playTone(freq: number, duration?: number, type?: OscillatorType): void;
   toggleMute(enabled: boolean): void;
+  isEnabled(): boolean;
+  setVolume(vol: number): void;
+  getVolume(): number;
 }
 
 export interface IHapticManager {
@@ -158,4 +177,12 @@ export interface IHapticManager {
   heavy(): void;
   success(): void;
   error(): void;
+  tick(): void;
+  countdown(): void;
+  warning(): void;
+  coin(): void;
+  explosion(): void;
+  selectionChanged(): void;
+  setEnabled(enabled: boolean): void;
+  isEnabled(): boolean;
 }
